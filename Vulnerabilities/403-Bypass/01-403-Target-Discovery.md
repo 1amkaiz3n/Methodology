@@ -106,7 +106,7 @@ Tahap ini melakukan pengecekan DNS untuk melihat domain mana saja yang benar-ben
 
 ```bash
 # compare
-comm -12 ../403-Bypass/dnsx_domains.txt ../403-Bypass/http_403_domains.txt > targets.txt
+comm -12 ../403-Bypass/dnsx_domains.txt ../403-Bypass/http_403_domains.txt > ../403-Bypass/targets.txt
 ```
 
 **Penjelasan:**
@@ -177,5 +177,3 @@ httpx -l ../403-Bypass/ips.txt -ip -status-code -title -web-server -tech-detect 
 * targets.txt → hasil correlation domain DNS valid + HTTP 403
 * ip_probe.txt → hasil probing langsung ke IP (status, title, backend behavior)
 
-
-# Lanjut ke 02.md

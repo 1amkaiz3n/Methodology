@@ -4,25 +4,14 @@
 
 # 1. METHOD BYPASS TESTING
 
-Ini udah mulai lu lakukan tadi.
+**Tujuan :**
+  * cari endpoint yang:
+    * GET = 403
+    * tapi:
+      * OPTIONS = 200
+      * HEAD = 200
+      * POST = 200
 
-Tujuan:
-
-* cari endpoint yang:
-
-  * GET = 403
-  * tapi:
-
-    * OPTIONS = 200
-    * HEAD = 200
-    * POST = 200
-
-Contoh real tadi:
-
-```text
-GET -> 403
-OPTIONS -> 200
-```
 
 Itu valid finding candidate.
 
@@ -32,23 +21,21 @@ Itu valid finding candidate.
 
 **cek variasi response :**
 ```bash
-httpx -l targets.txt -method GET,POST,OPTIONS,HEAD -status-code
-
-# atau 
-for m in GET POST OPTIONS HEAD; do httpx -l targets.txt -x $m -status-code -content-length -silent | sed "s/$/ [$m]/"; done
+for m in GET POST OPTIONS HEAD; do httpx -l ../403-Bypass/targets.txt -x $m -status-code -content-length -silent | sed "s/$/ [$m]/"; done
 ``
 
+Atau :
 
 ```bash
 for m in GET POST PUT PATCH OPTIONS HEAD TRACE; do
-  httpx -l targets.txt \
+  httpx -l ../403-Bypass/targets.txt \
   -x $m \
   -status-code \
   -content-length \
   -title \
   -silent \
   | sed "s/$/ [$m]/"
-done | tee method_bypass.txt
+done | tee ../403-Bypass/method_bypass.txt
 ```
 
 ---
@@ -91,7 +78,7 @@ Pake:
 ## Contoh
 
 ```bash
-ffuf -w targets.txt:HOST \
+ffuf -w ../403-Bypass/targets.txt:HOST \
 -u https://HOST/ \
 -H "X-Forwarded-For: 127.0.0.1"
 ```

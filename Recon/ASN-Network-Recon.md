@@ -1,8 +1,8 @@
-# 1. ASN & Network Recon (Infrastructure Mapping)
+# ASN & Network Recon (Infrastructure Mapping)
 
 ---
 
-## 1.1 ASN Mapping dari Domain Scope
+## ASN Mapping dari Domain Scope
 
 ```bash
 # Mapping ASN dari root/apex domain
@@ -18,7 +18,7 @@ Mengambil ASN dari domain untuk mengetahui jaringan / provider yang dipakai targ
 
 ---
 
-## 1.2 Extract CIDR Range dari ASN
+## Extract CIDR Range dari ASN
 
 ```bash
 # Extract CIDR
@@ -33,7 +33,7 @@ Mengambil blok IP (CIDR) dari ASN untuk memperluas attack surface ke level netwo
 
 ---
 
-## 1.3 Port Scanning pada CIDR
+## Port Scanning pada CIDR
 
 ```bash
 # Scan top ports dari seluruh CIDR
@@ -47,7 +47,7 @@ Scanning port umum untuk menemukan service terbuka di seluruh jaringan target.
 
 ---
 
-## 1.4 HTTP Service Probing
+## HTTP Service Probing
 
 ```bash
 # Probe HTTP service hasil network scan
@@ -64,7 +64,7 @@ Memvalidasi service HTTP/HTTPS yang aktif dari hasil port scanning.
 
 ---
 
-## 1.5 Reverse DNS (PTR Lookup)
+## Reverse DNS (PTR Lookup)
 
 ```bash
 # PTR lookup seluruh IP di CIDR
@@ -80,7 +80,7 @@ Mencari hostname yang terhubung ke IP untuk mapping infrastruktur tersembunyi.
 
 ---
 
-## 1.6 Filtering PTR yang Menarik
+## Filtering PTR yang Menarik
 
 ```bash
 cat ptr.txt \
@@ -94,7 +94,7 @@ Menyaring hostname yang berpotensi environment sensitif atau internal.
 
 ---
 
-## 1.7 HTTP Probing PTR Target
+## HTTP Probing PTR Target
 
 ```bash
 cat interesting_ptr.txt \
@@ -110,7 +110,7 @@ Mengecek apakah host internal yang ditemukan PTR memiliki service web aktif.
 
 ---
 
-## 1.8 Port Scanning PTR Target
+## Port Scanning PTR Target
 
 ```bash
 cat interesting_ptr.txt \
