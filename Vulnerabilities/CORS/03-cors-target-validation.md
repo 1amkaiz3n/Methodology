@@ -1,0 +1,56 @@
+# ✅ CORS - Target Validation & Exploitation
+
+Fuzzing endpoint dan validasi CORS secara langsung dengan token authentication.
+
+---
+
+## 🚀 Fuzz endpoints manually (berdasarkan naming pattern app)
+
+```bash
+# Simpan bearer token hasil login guest/session
+TOKEN='eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJ0dEdxbkRQTjZZejhtNmZ0bnI1NHAwX0RmTldIMFE5VDFOZlpXWVk4RHNNIn0.eyJleHAiOjE3NzkxMjQ1NTQsImlhdCI6MTc3OTEyMzY1NCwianRpIjoib25ydHJvOjFhZmM1NTExLThmZmEtNDliNi1hMjFiLWEwYWI5MDNjNWEyZSIsImlzcyI6Imh0dHBzOi8vb25ldmFzY28taWFtLnZmc2FpLmNvbS9yZWFsbXMvb25lLXZhc2NvLWNoYXRib3QiLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiNDAyMzk2YjYtYzYwYS00NGQwLWI5ZjQtNzg0NjU2NjM5MmRkIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiY2hhdGJvdC13d3ciLCJzaWQiOiI1YTYyZmYzYS1kZTA5LTQxZDktOWIzMi0wZjQ4MmQ2Yzc4YTkiLCJhY3IiOiIxIiwiYWxsb3dlZC1vcmlnaW5zIjpbImh0dHBzOi8vb25ldmFzY28tY2hhdC52ZnNhaS5jb20iXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbIm9mZmxpbmVfYWNjZXNzIiwiZGVmYXVsdC1yb2xlcy12ZnMtYWktdWF0MDEtY2hhdGJvdCIsInVtYV9hdXRob3JpemF0aW9uIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJlbWFpbCBwcm9maWxlIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJuYW1lIjoiR3Vlc3QtOTQxQTAxIiwicHJlZmVycmVkX3VzZXJuYW1lIjoiZ3Vlc3RfMzEwYTRlYTU2ZTk5NDU1MWI4ODE1NTcwMTJiM2E0NTgiLCJnaXZlbl9uYW1lIjoiR3Vlc3QtOTQxQTAxIn0.EtOmnDQNUqEAP5Zo6E9NMd_U9_3Uvw4X0y05iGt8hCwxIPtELiRhbACyATzJ7sS5ZGL5MSE-TPRW-E6HjFUZXOQJ-xxuYcVIpp3xdP7dYz4dnwkC5S7DfiXB_GzwZHVEZqKHyCojFUUo6GOW0svuoWhk3-w08cw6IaMHIj-kfX0zJ5aSgkAs1zBQMvRWqcqqMV1EhJRBFoZUXJC8arIR7q-YjhRgkaJ9E3RI6kjLLu91NCnzMqkjdt0313Ka5ypGnCEwu5j6IuYcdF2HE9-gqa8llrgpTnhcJTtrVSDTQnkYHahXkGiUd7ulCEmjIvFzzeM4VWVEMUsQC6mMIoWrXw'
+
+# Fuzz endpoint yang kemungkinan ada berdasarkan naming pattern app
+for ep in \
+/chats \
+/history \
+/messages \
+/feedback \
+/sessions \
+/chat-history \
+/conversations \
+/config \
+/health \
+/user \
+/profile \
+/prompts \
+/documents \
+/sourceDocument
+do
+  echo "=== $ep"
+
+  # Kirim HEAD request untuk lihat status code/header/CORS
+  curl -sk https://onevasco-client-api.vfsai.com$ep \
+   -H "Authorization: Bearer $TOKEN" \
+   -H "Origin: https://testing.aigoretech.com" \
+   -H "X-App-Id: 686e00665ecc2dcf59baf3b98b1394fe" \
+   -I
+done
+```
+
+---
+
+## ⚙️ Direct config probing
+
+```bash
+# Test endpoint config langsung
+# Sering berisi app config / feature flags / internal settings
+TOKEN='eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJ0dEdxbkRQTjZZejhtNmZ0bnI1NHAwX0RmTldIMFE5VDFOZlpXWVk4RHNNIn0.eyJleHAiOjE3NzkxMjQ1NTQsImlhdCI6MTc3OTEyMzY1NCwianRpIjoib25ydHJvOjFhZmM1NTExLThmZmEtNDliNi1hMjFiLWEwYWI5MDNjNWEyZSIsImlzcyI6Imh0dHBzOi8vb25ldmFzY28taWFtLnZmc2FpLmNvbS9yZWFsbXMvb25lLXZhc2NvLWNoYXRib3QiLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiNDAyMzk2YjYtYzYwYS00NGQwLWI5ZjQtNzg0NjU2NjM5MmRkIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiY2hhdGJvdC13d3ciLCJzaWQiOiI1YTYyZmYzYS1kZTA5LTQxZDktOWIzMi0wZjQ4MmQ2Yzc4YTkiLCJhY3IiOiIxIiwiYWxsb3dlZC1vcmlnaW5zIjpbImh0dHBzOi8vb25ldmFzY28tY2hhdC52ZnNhaS5jb20iXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbIm9mZmxpbmVfYWNjZXNzIiwiZGVmYXVsdC1yb2xlcy12ZnMtYWktdWF0MDEtY2hhdGJvdCIsInVtYV9hdXRob3JpemF0aW9uIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJlbWFpbCBwcm9maWxlIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJuYW1lIjoiR3Vlc3QtOTQxQTAxIiwicHJlZmVycmVkX3VzZXJuYW1lIjoiZ3Vlc3RfMzEwYTRlYTU2ZTk5NDU1MWI4ODE1NTcwMTJiM2E0NTgiLCJnaXZlbl9uYW1lIjoiR3Vlc3QtOTQxQTAxIn0.EtOmnDQNUqEAP5Zo6E9NMd_U9_3Uvw4X0y05iGt8hCwxIPtELiRhbACyATzJ7sS5ZGL5MSE-TPRW-E6HjFUZXOQJ-xxuYcVIpp3xdP7dYz4dnwkC5S7DfiXB_GzwZHVEZqKHyCojFUUo6GOW0svuoWhk3-w08cw6IaMHIj-kfX0zJ5aSgkAs1zBQMvRWqcqqMV1EhJRBFoZUXJC8arIR7q-YjhRgkaJ9E3RI6kjLLu91NCnzMqkjdt0313Ka5ypGnCEwu5j6IuYcdF2HE9-gqa8llrgpTnhcJTtrVSDTQnkYHahXkGiUd7ulCEmjIvFzzeM4VWVEMUsQC6mMIoWrXw'
+
+# Request config endpoint dengan auth + custom origin
+# Untuk validasi CORS reflection + info disclosure
+curl -isk https://onevasco-client-api.vfsai.com/applications/configs \
+ -H "Authorization: Bearer $TOKEN" \
+ -H "Origin: https://testing.aigoretech.com" \
+ -H "X-App-Id: 686e00665ecc2dcf59baf3b98b1394fe"
+```
