@@ -79,9 +79,7 @@ Pake:
 ### Contoh
 
 ```bash
-ffuf -w ../403-Bypass/targets.txt:HOST \
--u https://HOST/ \
--H "X-Forwarded-For: 127.0.0.1"
+ffuf -w ../403-Bypass/targets.txt:HOST -u https://HOST/ -H "X-Forwarded-For: 127.0.0.1"
 ```
 
 ---

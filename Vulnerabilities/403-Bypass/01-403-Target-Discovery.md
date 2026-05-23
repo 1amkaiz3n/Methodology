@@ -46,8 +46,14 @@ Tahap ini melakukan HTTP probing ke semua subdomain untuk melihat mana yang akti
 
 ## Filter 403
 
+BUat Folder untuk hasil recon 403 nya agar tidak bingun dan bercampur
+
 ```bash
-# Cara 1: Langsung pake grep buat ambil domain 403
+mkdir 403-Bypass
+```
+
+```bash
+# Langsung pake grep buat ambil domain 403
 cat live_hosts_info   | grep "403" > ../403-Bypass/403.txt
 ```
 
@@ -90,7 +96,7 @@ dnsx -l ../403-Bypass/http_403_domains.txt -a -cname -resp -silent -retry 5 > ..
 
 ```bash
 # ambil domain dari dnsx
-cat 403_resolved_dns.txt | awk '{print $1}' | sort -u > ../403-Bypass/dnsx_domains.txt
+cat ../403-Bypass/403_resolved_dns.txt | awk '{print $1}' | sort -u > ../403-Bypass/dnsx_domains.txt
 ```
 
 **Penjelasan:**
@@ -127,13 +133,13 @@ Ini adalah target prioritas karena menunjukkan service aktif namun dibatasi.
 
 ```bash
 grep -oE '\b([0-9]{1,3}\.){3}[0-9]{1,3}\b' ../403-Bypass/403.txt | anew ../403-Bypass/ips.txt
+```
 
-cat 403_resolved_dns.txt | awk '{print $NF}' | grep -Eo '([0-9]{1,3}\.){3}[0-9]{1,3}' | sort -u | anew ../403-Bypass/ips.txt
+```bash
+cat ../403-Bypass/403_resolved_dns.txt | awk '{print $NF}' | grep -Eo '([0-9]{1,3}\.){3}[0-9]{1,3}' | sort -u | anew ../403-Bypass/ips.txt
+```
 
-
-# Optional
-cat 403_resolved_dns.txt | awk '{print $1, $NF}' | tr -d '[]' > host_ip_map.txt
-
+```bash
 # Dedup
 sort -u ../403-Bypass/ips.txt -o ../403-Bypass/ips.txt
 ```
