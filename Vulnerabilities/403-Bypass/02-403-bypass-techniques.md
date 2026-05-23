@@ -2,7 +2,7 @@
 
 ---
 
-# 1. METHOD BYPASS TESTING
+## 1. METHOD BYPASS TESTING
 
 **Tujuan :**
   * cari endpoint yang:
@@ -17,7 +17,7 @@ Itu valid finding candidate.
 
 ---
 
-## Command
+### Command
 
 **cek variasi response :**
 ```bash
@@ -40,7 +40,7 @@ done | tee ../403-Bypass/method_bypass.txt
 
 ---
 
-# 2. HEADER BYPASS TESTING
+## 2. HEADER BYPASS TESTING
 
 Classic 403 bypass layer.
 
@@ -52,7 +52,7 @@ Cari:
 
 ---
 
-## Header candidates
+### Header candidates
 
 ```text
 X-Forwarded-For: 127.0.0.1
@@ -64,7 +64,7 @@ X-Forwarded-Host: localhost
 
 ---
 
-## Tools
+### Tools
 
 Pake:
 
@@ -75,7 +75,7 @@ Pake:
 
 ---
 
-## Contoh
+### Contoh
 
 ```bash
 ffuf -w ../403-Bypass/targets.txt:HOST \
@@ -85,7 +85,7 @@ ffuf -w ../403-Bypass/targets.txt:HOST \
 
 ---
 
-# 3. PATH NORMALIZATION BYPASS
+## 3. PATH NORMALIZATION BYPASS
 
 Cari:
 
@@ -94,7 +94,7 @@ Cari:
 
 ---
 
-## Payload examples
+### Payload examples
 
 ```text
 /admin
@@ -108,7 +108,7 @@ Cari:
 
 ---
 
-# 4. CDN / ORIGIN DISCOVERY
+## 4. CDN / ORIGIN DISCOVERY
 
 Ini penting banget.
 
@@ -126,7 +126,7 @@ Tujuannya:
 
 ---
 
-## Cari:
+### Cari:
 
 * direct IP
 * leaked hostname
@@ -136,7 +136,7 @@ Tujuannya:
 
 ---
 
-## Tools
+### Tools
 
 * dnsx
 * httpx
@@ -148,7 +148,7 @@ Tujuannya:
 
 ---
 
-# 5. HOST HEADER FUZZING
+## 5. HOST HEADER FUZZING
 
 Cari:
 
@@ -157,7 +157,7 @@ Cari:
 
 ---
 
-## Contoh
+### Contoh
 
 ```bash
 ffuf -w wordlist.txt \
@@ -167,7 +167,7 @@ ffuf -w wordlist.txt \
 
 ---
 
-# 6. CACHE BEHAVIOR TESTING
+## 6. CACHE BEHAVIOR TESTING
 
 Karena banyak Cloudflare.
 
@@ -179,7 +179,7 @@ Cari:
 
 ---
 
-## Cek:
+### Cek:
 
 ```text
 cf-cache-status
@@ -190,7 +190,7 @@ via
 
 ---
 
-# 7. RESPONSE DIFFERENTIAL ANALYSIS
+## 7. RESPONSE DIFFERENTIAL ANALYSIS
 
 Ini advanced dan powerful.
 
@@ -221,7 +221,7 @@ itu tanda backend leak.
 
 ---
 
-# 8. PARAMETER DISCOVERY
+## 8. PARAMETER DISCOVERY
 
 403 kadang cuma di root.
 
@@ -240,7 +240,7 @@ ternyata open.
 
 ---
 
-## Pakai:
+### Pakai:
 
 ```bash
 ffuf
@@ -252,7 +252,7 @@ hakrawler
 
 ---
 
-# 9. JAVASCRIPT RECON
+## 9. JAVASCRIPT RECON
 
 Penting banget buat target modern.
 
@@ -265,7 +265,7 @@ Cari:
 
 ---
 
-## Tools
+### Tools
 
 * katana
 * hakrawler
@@ -275,13 +275,13 @@ Cari:
 
 ---
 
-# 10. AUTOMATED NUCLEI PASSIVE
+## 10. AUTOMATED NUCLEI PASSIVE
 
 Baru setelah recon matang.
 
 ---
 
-## Jalankan:
+### Jalankan:
 
 ```bash
 nuclei -l targets.txt -severity low,medium,high,critical
