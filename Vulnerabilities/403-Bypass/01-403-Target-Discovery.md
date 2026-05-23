@@ -170,6 +170,66 @@ httpx -l ../403-Bypass/ips.txt -ip -status-code -title -web-server -tech-detect 
 
 
 
+## Cek IP
+
+### Cari IP dengan Response 200
+
+```bash
+cat ../403-Bypass/ip_probe.txt | grep 200
+```
+
+### Validasi IP
+
+Di tahap ini kita cek IP yang memiliki response 200
+Misaalkan IP `194.41.111.123` memiliki response 200,mak kita caru tahu dul ini IP siapa
+
+
+```bash
+curl -sk -I https://194.41.111.123
+```
+
+Intinya di tahap ini kita cari subdomain dengan response `403`,tapi ketika akses IP nya langsung, mendapatkan response `200`
+
+
+### Access via correct Host header 
+
+```bash
+curl -vk https://194.41.111.123 -H "Host: crl.post.ch"
+```
+
+### Test root only (OCSP behavior)
+
+```bash
+curl -vk https://194.41.111.123/
+```
+
+### Test method berbeda (kadang filtering beda)
+
+```bash
+curl -vk -X POST https://194.41.111.123/
+curl -vk -X OPTIONS https://194.41.111.123/
+```
+
+### Test path yang memang relevan PKI (bukan web app)
+
+```bash
+curl -vk https://194.41.111.123/ocsp
+curl -vk https://194.41.111.123/crl
+```
+
+### test sensitive path
+
+```bash
+curl -vk https://194.41.111.123/.well-known/
+curl -vk https://194.41.111.123/debug
+```
+
+### Brute force path
+
+```bash
+ffuf -w /home/arifin/belajar/bug_bounty/Tools/wordlists/SecLists/Discovery/Web-Content/raft-medium-directories.txt:FUZZ -u https://194.41.111.123/FUZZ
+```
+
 ## File Output :
 
 * domains → daftar seluruh subdomain hasil enumerasi awal
