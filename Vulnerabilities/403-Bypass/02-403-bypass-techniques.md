@@ -20,9 +20,10 @@ Itu valid finding candidate.
 ### Command
 
 **cek variasi response :**
+
 ```bash
 for m in GET POST OPTIONS HEAD; do httpx -l ../403-Bypass/targets.txt -x $m -status-code -content-length -silent | sed "s/$/ [$m]/"; done
-``
+```
 
 Atau :
 
