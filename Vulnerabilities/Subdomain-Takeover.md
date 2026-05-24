@@ -30,8 +30,6 @@ cat wildcards | while read domain; do
   github-subdomains -d "$domain" -raw
 done | grep -v 'https://' | grep -v '^\[' | anew domains
 
-# amass passive
-amass enum -passive -d target.com | anew domains
 ```
 
 
