@@ -113,11 +113,11 @@ shuffledns -mode bruteforce -d target.com -w ~/belajar/bug_bounty/Tools/best-dns
 ```
 
 
-## 6. ACTIVE ATTACK SURFACE DISCOVERY
+## ACTIVE ATTACK SURFACE DISCOVERY
 
 
 
-### 6.1 DNS BRUTE FORCE (Active Subdomain Enumeration)
+### DNS BRUTE FORCE (Active Subdomain Enumeration)
 
 ```bash
 gobuster dns -d target.com -w wordlist.txt
@@ -131,7 +131,7 @@ mksub -d target.com -l2 -w dns-wordlist.txt
 
 
 
-### 6.2 VIRTUAL HOST FUZZING (HTTP Layer Discovery)
+### VIRTUAL HOST FUZZING (HTTP Layer Discovery)
 
 ```bash
 ffuf -c -r \
@@ -147,7 +147,7 @@ ffuf -c -r \
 
 
 
-## 7. REVERSE DNS / IP INTELLIGENCE (INFRASTRUCTURE MAPPING)
+## REVERSE DNS / IP INTELLIGENCE (INFRASTRUCTURE MAPPING)
 
 ```bash
 # Ambil IP dari host aktif
