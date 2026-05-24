@@ -73,7 +73,7 @@ dirsearch -u https://blog.onevasco.com -e php,txt,zip,html -t 60
 **ffuf :**
 
 ```bash
-ffuf -w /home/arifin/belajar/bug_bounty/Tools/wordlists/SecLists/Discovery/Web-Content/common.txt:FUZZ -u https://api.onevasco.com/FUZZ 
+ffuf -w /wordlists/SecLists/Discovery/Web-Content/common.txt:FUZZ -u https://api.onevasco.com/FUZZ 
 ```
 
 Important directories :

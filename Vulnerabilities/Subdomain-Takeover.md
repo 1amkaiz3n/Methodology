@@ -199,7 +199,7 @@ cat hosts | xargs -P 30 -I {} bash -c 'check "{}"'
 ```
 
 ```bash
-cat hosts | ~/belajar/bug_bounty/Tools/takeover-check.sh
+cat hosts | ./takeover-check.sh
 ```
 
 

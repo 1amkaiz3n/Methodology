@@ -21,7 +21,7 @@ if [ -z "$1" ]; then
 fi
 
 WILDCARDS="$1"
-RESOLVERS=~/belajar/bug_bounty/Tools/resolvers.txt
+RESOLVERS=/resolvers.txt
 
 # --- Cek file wildcards ada ---
 if [ ! -f "$WILDCARDS" ]; then

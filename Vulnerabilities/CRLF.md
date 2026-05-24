@@ -111,7 +111,7 @@ Memastikan raw path tidak di-encode ulang oleh server/CDN.
 
 ```bash id="crlf9"
 # aktifkan environment
-source ~/belajar/bug_bounty/Tools/myenv/bin/activate
+source /myenv/bin/activate
 
 # single target
 crlfsuite -t http://testphp.vulnweb.com/

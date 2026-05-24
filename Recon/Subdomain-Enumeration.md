@@ -50,7 +50,7 @@ cat domains | alterx > alterx_domain.txt
 ```bash
 dnsx -l shuffledns.txt -resp -a -cname -silent | anew valid_domains.txt
 # atau pake file
-dnsx -l alterx_domain.txt -r ~/belajar/bug_bounty/Tools/resolvers.txt -resp -o valid_domains.txt -t 300
+dnsx -l alterx_domain.txt -r /resolvers.txt -resp -o valid_domains.txt -t 300
 ```
 
 **MERGE dan DEDUP hasil validasi ke list subdomain**
@@ -116,7 +116,7 @@ cat wildcards | while read domain; do
   github-subdomains -d "$domain" -raw
 done | grep -v 'https://' | grep -v '^\[' | anew domains && \
 cat domains | alterx -o alterx_domains.txt && \
-shuffledns -mode resolve -l alterx_domains.txt -r ~/belajar/bug_bounty/Tools/resolvers.txt -o resolved.txt -t 50 && \
+shuffledns -mode resolve -l alterx_domains.txt -r /resolvers.txt -o resolved.txt -t 50 && \
 dnsx -l resolved.txt -resp -a -cname -silent | anew valid_domains.txt && \
 cat valid_domains.txt | awk '{print $1}' | anew domains && \
 cat domains | httpx -silent -threads 200 -follow-redirects -status-code -title -tech-detect -content-length -web-server -ip -cname -location | tee live_hosts_info
@@ -141,7 +141,7 @@ wget https://github.com/trickest/resolvers/blob/main/resolvers.txt
 ### shuffledns
 
 ```bash
-shuffledns -mode bruteforce -d target.com -w ~/belajar/bug_bounty/Tools/best-dns-wordlist.txt -r ~/belajar/bug_bounty/Tools/resolvers.txt -o brute_subdomain.txt
+shuffledns -mode bruteforce -d target.com -w /best-dns-wordlist.txt -r /resolvers.txt -o brute_subdomain.txt
 ```
 
 

@@ -36,7 +36,7 @@ grep -Rni "Access-Control-Allow-Origin" cors_out/feedback.post.ch/1c29555df*
 
 ```bash
 # Aktifkan env
-source ~/belajar/bug_bounty/Tools/myenv/bin/activate 
+source /myenv/bin/activate 
 
 # Basic
 corscanner -u https://example.com

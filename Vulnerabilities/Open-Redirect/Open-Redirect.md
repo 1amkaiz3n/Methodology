@@ -42,7 +42,7 @@ atau
 ```bash
 cat open-redirect/decoded.txt | qsreplace 'https://evil.com' | httpx -fr -sc -o open-redirect/results.txt
 
-cat open-redirect/decoded.txt | openredirex -p ~/belajar/bug_bounty/Tools/openredirex/payloads.txt -k FUZZ -c 50
+cat open-redirect/decoded.txt | openredirex -p /openredirex/payloads.txt -k FUZZ -c 50
 ```
 
 
@@ -68,13 +68,13 @@ curl -I -L "URL"
 
 ```bash
 # Aktifkan env
-source ~/belajar/bug_bounty/Tools/myenv/bin/activate
+source /myenv/bin/activate
 
-cat open-redirect/redirect_candidates.txt  | qsreplace 'https://evil.com' |  openredirex -p ~/belajar/bug_bounty/Tools/openredirex/payloads.txt
+cat open-redirect/redirect_candidates.txt  | qsreplace 'https://evil.com' |  openredirex -p /openredirex/payloads.txt
 
-cat open-redirect/redirect_results.txt | qsreplace "FUZZ" | openredirex -p ~/belajar/bug_bounty/Tools/openredirex/payloads.txt -k "FUZZ" -c 50
+cat open-redirect/redirect_results.txt | qsreplace "FUZZ" | openredirex -p /openredirex/payloads.txt -k "FUZZ" -c 50
 
-cat open-redirect/redirect_results.txt | qsreplace FUZZ | openredirex -p ~/belajar/bug_bounty/Tools/openredirex/payloads.txt-k FUZZ -c 50
+cat open-redirect/redirect_results.txt | qsreplace FUZZ | openredirex -p /openredirex/payloads.txt-k FUZZ -c 50
 ```
 
 

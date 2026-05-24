@@ -241,7 +241,7 @@ curl -vk https://194.41.111.123/debug
 ### Brute force path
 
 ```bash
-ffuf -w /home/arifin/belajar/bug_bounty/Tools/wordlists/SecLists/Discovery/Web-Content/raft-medium-directories.txt:FUZZ -u https://194.41.111.123/FUZZ
+ffuf -w /wordlists/SecLists/Discovery/Web-Content/raft-medium-directories.txt:FUZZ -u https://194.41.111.123/FUZZ
 ```
 
 ## File Output :
