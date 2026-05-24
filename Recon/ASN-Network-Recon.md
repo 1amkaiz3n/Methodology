@@ -8,6 +8,77 @@
   - mapcidr
   - dnsx
 
+
+> File wicdcards = list root domain
+
+## Cari ASN dari domain (Manual)
+
+###  Cari IP address dari domain
+
+```bash
+dig vfsglobal.com
+# atau
+nslookup vfsglobal.com
+# atau
+host vfsglobal.com
+```
+### Cari ASN dari IP address yang didapat
+
+```bash
+whois 13.35.163.31 | grep -i "origin\|asn\|aut-sys"
+# Atau via radb.net
+whois -h whois.radb.net 13.35.163.78 | grep -i "^origin"
+```
+
+```bash
+# via ipinfo.io
+curl -s https://ipinfo.io/13.35.163.31 | grep -E "\"org\"|\"asn\""
+```
+
+### dari website
+
+- [https://bgp.he.net](https://bgp.he.net)
+- [ipinfo.io](https://ipinfo.io)
+
+### CEK SEMUA DOMAIN DI FILE wildcards (pilih salah satu)
+
+
+**VERSI RADB.NET**
+
+```bash
+for domain in $(cat wildcards); do
+    echo "=== $domain ==="
+    ip=$(dig +short $domain | head -1)
+    if [ -n "$ip" ]; then
+        # Pake whois ke radb.net (berhasil kemarin)
+        asn=$(whois -h whois.radb.net $ip 2>/dev/null | grep -i "^origin:" | head -1 | awk '{print $2}')
+        echo "IP: $ip"
+        echo "ASN: $asn"
+    else
+        echo "No IP found"
+    fi
+    echo ""
+done
+```
+
+**VERSI IPINFO.IO**
+
+```bash
+for domain in $(cat wildcards); do
+    echo "=== $domain ==="
+    ip=$(dig +short $domain | head -1)
+    if [ -n "$ip" ]; then
+        asn=$(curl -s https://ipinfo.io/$ip | grep -o '"org": "[^"]*"' | head -1)
+        echo "IP: $ip"
+        echo "ASN: $asn"
+    else
+        echo "No IP found"
+    fi
+    echo ""
+done
+```
+
+
 ## ASN Mapping dari Domain Scope
 
 ```bash
@@ -47,6 +118,7 @@ Mengambil blok IP (CIDR) dari ASN untuk memperluas scope ke jaringan IP yang mun
   - bukan 1 server, tapi kumpulan banyak IP
   - daftar wilayah IP besar tempat semua server target bisa berada
 
+
 ## Port Scanning pada CIDR
 
 ```bash
@@ -66,22 +138,40 @@ Melakukan scanning port umum untuk menemukan service yang terbuka di seluruh IP 
   - daftar pintu yang terbuka di semua jaringan target
 
 
-## HTTP Service Probing
+## Confirm Live Web Apps with HTTPX
 
 ```bash
 # Probe HTTP service hasil network scan
-cat ports.txt \
-| httpx -silent \
-  -title \
-  -tech-detect \
-  -status-code \
-| tee live-network-hosts.txt
+cat ports.txt | httpx -silent -title -tech-detect -status-code | tee live-network-hosts.txt
 ```
 
 **Penjelasan:**
 Memvalidasi service web yang aktif dari hasil port scanning dan mengambil informasi penting seperti status code, title, dan teknologi yang digunakan.
 
 
+
+##  BUANG SEMUA CIDR CLOUDFLARE DARI cidr.txt
+
+```bash
+# Hapus CIDR Cloudflare (104.x.x.x, 172.64.x.x)
+grep -v "104\." cidr.txt | grep -v "172\.64" | tee cidr-clean.txt
+
+# Lihat hasilnya
+cat cidr-clean.txt
+```
+
+## Scan ulang cuma CIDR yang clean
+
+```bash
+# Scan port di CIDR clean
+cat cidr-clean.txt | naabu -top-ports 100 -silent | tee ports-clean.txt
+
+# Probe HTTP
+cat ports-clean.txt | httpx -silent -title -tech-detect -status-code | tee live-clean.txt
+
+# Lihat hasil
+cat live-clean.txt
+```
 
 ## Reverse DNS (PTR Lookup)
 
@@ -105,12 +195,7 @@ Melakukan reverse DNS lookup untuk mencari hostname yang terhubung ke IP. Ini be
 
 ## Filtering PTR yang Menarik
 
-```bash
-cat ptr.txt \
-| grep -Ei 'dev|test|sta|stage|gw|mail|mx|vpn|admin|api' \
-| sort -u \
-| tee interesting_ptr.txt
-```
+c
 
 **Penjelasan:**
 Menyaring hostname yang kemungkinan besar merupakan environment sensitif seperti development, staging, admin panel, VPN, atau mail server.
@@ -158,3 +243,10 @@ Melakukan scanning port pada target hasil PTR untuk menemukan service tambahan s
   * service non-web (SSH, DB, API internal)
   * potensi entry point tambahan selain HTTP
   * attack surface tambahan dari hasil PTR
+
+
+## Scan for Vulnerabilities with Nuclei
+
+```bash
+nuclei -no-color -stats -templates ~/nuclei-templates/ -list live-network-hosts.txt -exclude-severity info -concurrency 20 -o findings.txt
+```
