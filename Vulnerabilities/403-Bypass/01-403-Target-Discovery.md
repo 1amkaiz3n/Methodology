@@ -127,7 +127,21 @@ Ini adalah target prioritas karena menunjukkan service aktif namun dibatasi.
 
 * hasil irisan domain DNS ∩ HTTP 403 (high-value targets)
 
----
+## WAF DETECTION LAYER
+
+
+```bash
+wafw00f target.com
+```
+
+Atau cek semuanya sekaligus
+
+```bash
+while read target; do
+    echo "Testing: $target"
+    wafw00f https://$target -o ../403-Bypass/${target}.json -f json
+done < ../403-Bypass/targets.txt
+```
 
 ## Pisahkan IP
 
