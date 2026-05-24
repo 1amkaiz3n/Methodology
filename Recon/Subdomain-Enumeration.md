@@ -12,11 +12,30 @@ Download Resolver :
 wget https://raw.githubusercontent.com/trickest/resolvers/refs/heads/main/resolvers.txt
 ```
 
-### Subfinder & asetfinder
+### Subfinder,asetfinder,chaos,github-domain,crt.sh
 
 ```bash
 subfinder -dL wildcards | anew domains
 cat wildcards | assetfinder --subs-only | sort -u | anew domains
+chaos -dL wildcards | anew domains
+```
+
+```bash
+cat wildcards | while read domain; do
+  github-subdomains -d "$domain" -raw
+done | grep -v 'https://' | grep -v '^\[' | anew domains
+```
+
+```bash
+cat wildcards | while read domain; do
+  curl -s "https://crt.sh/?q=%.$domain&output=json" \
+    | grep -v '^<' \
+    | jq -r '.[].name_value' 2>/dev/null \
+    | sed 's/\*\.//g' \
+    | tr ',' '\n' \
+    | grep -v '^\*' \
+    | grep "\.$domain$"
+done | sort -u | anew domains
 ```
 
 ## PERMUTATION (EXPANSION)
@@ -83,6 +102,19 @@ cat domains | httpx -silent -threads 200 \
 ```bash id="s1"
 subfinder -dL wildcards | anew domains && \
 cat wildcards | assetfinder --subs-only | sort -u | anew domains && \
+cat wildcards | while read domain; do
+  curl -s "https://crt.sh/?q=%.$domain&output=json" \
+    | grep -v '^<' \
+    | jq -r '.[].name_value' 2>/dev/null \
+    | sed 's/\*\.//g' \
+    | tr ',' '\n' \
+    | grep -v '^\*' \
+    | grep "\.$domain$"
+done | sort -u | anew domains && \
+chaos -dL wildcards | anew domains && \
+cat wildcards | while read domain; do
+  github-subdomains -d "$domain" -raw
+done | grep -v 'https://' | grep -v '^\[' | anew domains && \
 cat domains | alterx -o alterx_domains.txt && \
 shuffledns -mode resolve -l alterx_domains.txt -r ~/belajar/bug_bounty/Tools/resolvers.txt -o resolved.txt && \
 dnsx -l resolved.txt -resp -a -cname -silent | anew valid_domains.txt && \
