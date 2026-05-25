@@ -1,149 +1,211 @@
-# 403 → DNS Enum → Origin IP Discovery → Backend Misconfig Exploitation
+# Origin IP Leakage through DNS & Load Balancer Analysis
 
-Diawali 403 di domain → cari IP origin → bypass CDN/WAF → exploit misconfigured backend 
 
-## CDN Detection — pisahin yang pakai CDN
-
-Dari live hosts, deteksi mana yang pakai CDN (Cloudflare, Akamai, Fastly, dll) lewat CNAME chain. Yang pakai CDN = kandidat untuk dicari origin IP-nya.
+## Sub Enum
 
 ```bash
-cat hosts | httpx -silent -cname -status-code   | grep -iE "cloudflare|akamai|fastly|cloudfront|incapsula"   | awk '{print $1}'  | sed 's|https://||g' > cdn_targets.txt
+subfinder -dL wildcards | anew domains && \
+cat wildcards | assetfinder --subs-only | sort -u | anew domains
 ```
 
-## DNS Resolution — resolve semua IP per domain
+**Penjelasan:**
+Tahap ini digunakan untuk mengumpulkan seluruh subdomain yang mungkin terkait dengan target dari berbagai sumber. Hasilnya adalah daftar domain awal yang akan dipakai untuk semua proses recon berikutnya.
 
-Resolve DNS untuk dapat semua A record. Pakai -resp-all supaya dapet semua IP (load balancer sering punya 2-3 node, beda config tiap nodenya).
+**Output:**
+
+* domains → daftar semua subdomain hasil enumerasi
+* (sementara belum dicek hidup/mati atau resolvable)
+
+
+
+## FILTER LIVE HOST
 
 ```bash
-dnsx -l cdn_targets.txt -a -resp-all -silent -retry 5 \
-  > resolved_all.txt
+cat domains | httpx -silent -threads 200 \
+-follow-redirects \
+-status-code \
+-title \
+-tech-detect \
+-content-length \
+-web-server \
+-ip \
+-cname \
+-location \
+| tee live_hosts_info
 ```
 
-```bash
-# Ekstrak IP bersih
-grep -oE '\b([0-9]{1,3}\.){3}[0-9]{1,3}\b' resolved_all.txt \
-  | sort -u > origin_ips.txt
-```
-## Filter IP CDN
-origin_ips.txt bisa masih isinya IP Cloudflare
-Setelah dnsx resolve, IP yang keluar bisa aja masih IP CDN bukan origin. Perlu dibuang dulu sebelum probe, biar httpx-nya nggak buang waktu probe IP yang salah.
+**Penjelasan:**
+Tahap ini melakukan HTTP probing ke semua subdomain untuk melihat mana yang aktif secara web. Sekaligus mengumpulkan metadata seperti status code, teknologi, IP, server, dan redirect behavior.
 
-```bash
-# Download range IP Cloudflare
-curl -s https://www.cloudflare.com/ips-v4 > /tmp/cf_ranges.txt
+**Output:**
 
-# Filter buang IP yang masuk range CDN
-mapcidr -l /tmp/cf_ranges.txt -silent \
-  | sort > /tmp/cf_expanded.txt
+* live_hosts_info → daftar host yang aktif beserta detail HTTP response
 
-comm -23 \
-  <(sort origin_ips.txt) \
-  <(sort /tmp/cf_expanded.txt) \
-  > origin_ips_clean.txt
-```
 
-## Passive origin IP hunting
-DNS aktif aja tidak cukup — SPF & MX sering bocahin origin
-TXT record (SPF) dan MX record sering dikonfigurasi oleh orang yang sama dengan yang setup server. Hasilnya sering nyebut IP origin langsung — bahkan setelah domain dipasang CDN.
+
+## Filter 403 & 401
+
 
 ```bash
-# Cek SPF & MX record per domain CDN target
-while read domain; do
-  # SPF → sering ada ip4: yang nunjuk origin
-  dig +short TXT $domain \
-    | grep -oE 'ip4:[0-9.]+' \
-    | sed 's/ip4://'
-  # MX → kadang resolve ke IP origin
-  dig +short MX $domain \
-    | awk '{print $2}' \
-    | xargs -I{} dig +short {}
-done < cdn_targets.txt \
-  | grep -oE '\b([0-9]{1,3}\.){3}[0-9]{1,3}\b' \
-  | sort -u >> origin_ips_clean.txt
-
-sort -u origin_ips_clean.txt -o origin_ips_clean.txt
-```
-
-
-## IP Probing — cek tiap IP langsung
-
-Probe langsung ke IP tanpa Host header. Yang return beda dari 403 (200, 301, 302 ke /admin dst) = origin exposed. Ini yang jadi target utama.
-
-```bash
-httpx -l origin_ips.txt \
-  -silent -status-code -title \
-  -web-server -tech-detect \
-  -follow-redirects \
-  > ip_probe_results.txt
+mkdir 403-Bypass
 ```
 
 ```bash
-# Pisahin yang menarik (bukan 403/400)
-grep -vE " \[403\]| \[400\]" ip_probe_results.txt \
-  > ip_exposed.txt
+# Langsung pake grep buat ambil domain 403
+awk '$0 ~ /\[.*403.*\]/ {print}' live_hosts_info  > ../403-Bypass/403.txt
+awk '$0 ~ /\[.*401.*\]/ {print}' live_hosts_info  > ../403-Bypass/401.txt
 ```
 
-httpx default cuma probe 80 dan 443. Tapi origin yang exposed sering jalan di 8080, 8443, 8888, 9090 — terutama staging dan UAT environment. Ini sering kelewat.
+Satukan :
 
 ```bash
-# bisa juga:
-httpx -l origin_ips_clean.txt \
-  -ports 80,443,8080,8443,8888,9090 \
-  -silent -status-code -title \
-  -web-server -tech-detect \
-  -follow-redirects \
-  > ip_probe_results.txt
+cat ../403-Bypass/403.txt ../403-Bypass/401.txt | sort -u | anew ../403-Bypass/candidat.txt
 ```
 
-## SSL Cert SAN Leak — pivot ke domain tersembunyi
+**Penjelasan:**
+Tahap ini menyaring semua host yang merespons HTTP 403 (Forbidden)dan 401 (Unauthorized) untuk analisa lebih lanjut. Ini penting karena menunjukkan endpoint yang aktif tetapi dibatasi aksesnya.
 
-Dari IP yang exposed, baca SSL certificate-nya. SAN (Subject Alternative Names) sering bocahin subdomain internal, staging, atau domain lain yang sama origin.
+**Output:**
+
+* 403.txt → daftar host yang menghasilkan response 403
+* 401.txt → daftar host yang menghasilkan response 401
+
+
+## Extract domain & IP
 
 ```bash
+# ambil domain dari httpx
+cat ../403-Bypass/candidat.txt | awk '{print $1}' | sed 's|https://||g' | cut -d'/' -f1 | sort -u > ../403-Bypass/http_domains.txt
+```
+
+```bash
+grep -oE '\b([0-9]{1,3}\.){3}[0-9]{1,3}\b' ../403-Bypass/candidat.txt | anew ../403-Bypass/ips.txt
+```
+
+
+## Ambil semau IP dari list domain
+
+Tujuan ini adalh untuk mendaptan ip lain dari subdomain yang mungkin bisa di akses
+
+```bash
+dnsx -l ../403-Bypass/http_403_domains.txt -a -resp-only  -silent -retry 5 | anew ../403-Bypass/ips.txt
+```
+
+
+
+## IP REALITY CHECK (HOST HEADER / SHARED IP)
+
+```bash
+httpx -l ../403-Bypass/ips.txt -ip -status-code -title -web-server -tech-detect -content-length -location  > ../403-Bypass/ip_probe.txt
+```
+
+## NODE GROUPING
+
+**Tujuan :** kelompokkan IP yang punya behavior sama
+
+```bash
+httpx -l ../403-Bypass/ips.txt -ip -status-code -title -web-server -tech-detect -cname -silent > ../403-Bypass/ip_fingerprint.txt
+```
+
+
+## Testing
+
+```bash
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
 while read ip; do
-  echo "=== $ip ==="
-  echo | openssl s_client -connect $ip:443 2>/dev/null \
-    | openssl x509 -noout -text \
-    | grep -oP '(?<=DNS:)[^\s,]+'
-done < <(awk '{print $1}' ip_exposed.txt) \
-  > san_leak.txt
+  echo -e "${BLUE}========================${NC}"
+  echo -e "${BLUE}IP: $ip${NC}"
+  echo -e "${BLUE}========================${NC}"
+
+  while read domain; do
+
+    code=$(curl -sk --max-time 5 "https://$ip" \
+      -H "Host: $domain" \
+      -o /dev/null \
+      -w "%{http_code}")
+
+    # ❌ skip kalau 000
+    if [[ "$code" == "000" ]]; then
+      continue
+    fi
+
+    if [[ "$code" == "200" ]]; then
+      color=$GREEN
+    elif [[ "$code" == "301" || "$code" == "302" ]]; then
+      color=$YELLOW
+    elif [[ "$code" == "403" || "$code" == "401" ]]; then
+      color=$RED
+    else
+      color=$NC
+    fi
+
+    echo -e "$ip -> $domain -> ${color}$code${NC}"
+
+  done < ../403-Bypass/http_domains.txt
+
+done < ../403-Bypass/ips.txt
 ```
 
-## Backend Fingerprint — identifikasi framework & probe endpoint
-
-Dari IP yang exposed, fingerprint backend-nya lalu probe endpoint default per framework. Ini yang menentukan apakah ada misconfiguration yang bisa dieksploitasi.
+Atau lebih cepat
 
 ```bash
-# Contoh endpoint per framework
-# Directus  → /server/info  /server/specs/oas  /items/*
-# Laravel   → /api/user  /_ignition/health-check
-# Strapi    → /admin  /api/users/me
-# Grafana   → /api/health  /api/datasources
-# Jenkins   → /api/json  /asynchPeople/api/json
-```
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
 
-```bash
+THREADS=30
+
 while read ip; do
-  for path in /server/info /api/user /admin /api/health; do
-    code=$(curl -sk -o /dev/null -w "%{http_code}" https://$ip$path)
-    echo "$ip$path → $code"
-  done
-done < <(awk '{print $1}' ip_exposed.txt) \
-  > endpoint_probe.txt
+  echo -e "${BLUE}========================${NC}"
+  echo -e "${BLUE}IP: $ip${NC}"
+  echo -e "${BLUE}========================${NC}"
+
+  cat ../403-Bypass/http_domains.txt | xargs -P $THREADS -I{} bash -c '
+    ip="'"$ip"'"
+    domain="{}"
+
+    code=$(curl -sk --max-time 4 "https://$ip" \
+      -H "Host: $domain" \
+      -o /dev/null \
+      -w "%{http_code}")
+
+    [[ "$code" == "000" ]] && exit 0
+
+    if [[ "$code" == "200" ]]; then
+      color="\033[0;32m"
+    elif [[ "$code" == "301" || "$code" == "302" ]]; then
+      color="\033[1;33m"
+    elif [[ "$code" == "403" || "$code" == "401" ]]; then
+      color="\033[0;31m"
+    else
+      color="\033[0m"
+    fi
+
+    echo -e "$ip -> $domain -> ${color}$code\033[0m"
+  '
+
+done < ../403-Bypass/ips.txt
 ```
+
+## WAF DETECTION 
+
 
 ```bash
-grep -v "→ 403\|→ 404\|→ 000" endpoint_probe.txt \
-  > endpoint_hits.txt
+wafw00f target.com
 ```
 
+Atau cek semuanya sekaligus
 
-**Output files :**
-  - cdn_targets.txt
-  - resolved_all.txt 
-  - origin_ips.txt 
-  - ip_probe_results.txt 
-  - ip_exposed.txt 
-  - san_leak.txt 
-  - endpoint_probe.txt 
-  - endpoint_hits.txt 
+```bash
+while read target; do
+    echo "Testing: $target"
+    wafw00f https://$target -o ../403-Bypass/${target}.json -f json
+done < ../403-Bypass/targets.txt
+`

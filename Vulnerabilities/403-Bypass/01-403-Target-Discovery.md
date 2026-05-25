@@ -44,9 +44,10 @@ Tahap ini melakukan HTTP probing ke semua subdomain untuk melihat mana yang akti
 
 ---
 
-## Filter 403
+## Filter 403 & 401
 
 BUat Folder untuk hasil recon 403 nya agar tidak bingun dan bercampur
+Kenap cuma ambil yang 403 dan 401??karena ini yang kemungminan di lindungi kan tujuan kita bypass
 
 ```bash
 mkdir 403-Bypass

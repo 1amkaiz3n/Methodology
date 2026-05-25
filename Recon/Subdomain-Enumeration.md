@@ -51,6 +51,8 @@ cat domains | alterx > alterx_domain.txt
 dnsx -l shuffledns.txt -resp -a -cname -silent | anew valid_domains.txt
 # atau pake file
 dnsx -l alterx_domain.txt -r /resolvers.txt -resp -o valid_domains.txt -t 300
+# shuffledns
+shuffledns -mode resolve -l alterx_domains.txt -r /resolvers.txt -o resolved.txt -t 50
 ```
 
 **MERGE dan DEDUP hasil validasi ke list subdomain**
