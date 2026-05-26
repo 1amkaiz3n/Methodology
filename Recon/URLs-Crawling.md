@@ -22,6 +22,11 @@ cat hosts | hakrawler -depth 3 -plain | sort -u | anew urls
 cat urls | grep "=" > params.txt
 ```
 
+```bash
+bbot -t hosts -p spider -c web.spider_distance=2 web.spider_depth= -o .
+```
+
+> **BBBOT ini akan menghaislkn folder rnadom seperti `sophisticated_diana`,dan di dalalmnay ad beberpa file seprti `output.txt `**
 
 ## 📌 OUTPUT FILE STRUCTURE (WAJIB BIAR RAPI)
 

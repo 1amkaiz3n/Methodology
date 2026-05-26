@@ -14,13 +14,18 @@ Download Resolver :
 wget https://raw.githubusercontent.com/trickest/resolvers/refs/heads/main/resolvers.txt
 ```
 
-### Subfinder,asetfinder,chaos,github-domain,crt.sh
+### Subfinder,asetfinder,chaos,github-domain,crt.sh,bbot
 
 ```bash
 subfinder -dL wildcards | anew domains
 cat wildcards | assetfinder --subs-only | sort -u | anew domains
 chaos -dL wildcards | anew domains
 ```
+
+```bash
+bbot -t wildcards -p subdomain-enum -o .
+```
+> **BBBOT ini akan menghaislkn folder rnadom seperti `sophisticated_diana`,dan di dalalmnay ad beberpa file seprti `subdomains.txt `**
 
 ```bash
 cat wildcards | while read domain; do
