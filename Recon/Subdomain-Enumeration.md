@@ -124,9 +124,7 @@ chaos -dL wildcards | anew domains && \
 cat wildcards | while read domain; do
   github-subdomains -d "$domain" -raw
 done | grep -v 'https://' | grep -v '^\[' | anew domains && \
-cat domains | alterx -o alterx_domains.txt && \
-shuffledns -mode resolve -l alterx_domains.txt -r /resolvers.txt -o resolved.txt -t 50 && \
-dnsx -l resolved.txt -resp -a -cname -silent | anew valid_domains.txt && \
+cat domains | dnsx -resp -a -cname -silent | anew valid_domains.txt && \
 cat valid_domains.txt | awk '{print $1}' | anew domains && \
 cat domains | httpx -silent -threads 200 -follow-redirects -status-code -title -tech-detect -content-length -web-server -ip -cname -location | tee live_hosts_info
 ```
