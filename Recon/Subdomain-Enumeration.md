@@ -1,7 +1,9 @@
 # 📌 Methodology — Subdomain Enumeration
 
 * wildcards → list domain yagn ada di scope
-
+Contoh :
+  - sub.target.com
+  - sub2.target.com
 
 
 ## SUBDOMAIN DISCOVERY (PASSIVE + ACTIVE)
