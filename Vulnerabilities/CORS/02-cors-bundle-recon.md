@@ -39,14 +39,20 @@ tmp=$(mktemp) && js-beautify main.538e8d6b6e25fd45.js > "$tmp" && mv "$tmp" main
 # Cari penggunaan Authorization header
 # Indikasi endpoint yang butuh bearer token/auth
 grep -R "Authorization" .
+```
 
+```bash
 # Cari string /api untuk mapping API routes
 grep -R "/api" .
+```
 
+```bash
 # Cari keyword chat
 # Biasanya ada feature chatbot/conversation endpoint
 grep -R "chat" .
+```
 
+```bash
 # Cari history endpoint
 # Kadang ada endpoint retrieve conversation history
 grep -R "history" .
@@ -60,26 +66,36 @@ grep -R "history" .
 # Extract full hardcoded URL dari bundle
 # Useful untuk menemukan backend lain / third-party API
 grep -aoE 'https?://[^"'\'' )]+' main.538e8d6b6e25fd45.js | sort -u
+```
 
+```bash
 # Extract kemungkinan endpoint/path
 # Dump semua string mirip route ke file endpoints.txt
 grep -aoE '/[A-Za-z0-9._~:/?#@!$&()*+,;=%-]+' main.538e8d6b6e25fd45.js | sort -u | uniq > endpoints.txt
+```
 
+```bash
 # Cari keyword sensitif / feature penting
 # Fokus: auth, user data, admin, prompt, document, session
 grep -aiE 'chat|history|message|session|token|feedback|prompt|document|admin|config|user|profile|conversation' main.538e8d6b6e25fd45.js
+```
 
+```bash
 # Extract string route mentah yang diawali /
 # Kadang lebih banyak dapet endpoint tersembunyi
 strings main.538e8d6b6e25fd45.js | grep -E '^/' | sort -u
+```
 
+```bash
 # Parsing string lebih bersih dengan split berdasarkan quote
 # Kadang endpoint kebungkus string literal
 cat main.538e8d6b6e25fd45.js \
 | tr '"' '\n' \
 | grep -E '^/?[A-Za-z0-9._/-]+$' \
 | sort -u
+```
 
+```bash
 # Cari hardcoded config auth/backend
 # Misal baseUrl, OpenID, Keycloak, realm, issuer
 grep -aiE 'api|baseUrl|clientId|realm|issuer|openid' main.538e8d6b6e25fd45.js
@@ -97,7 +113,9 @@ Minified JS kadang path disusun string concat, jadi grep /... kurang kena.
 grep -aoE '"/[^"]+|'\''/[^'\'']+' main.538e8d6b6e25fd45.js \
 | sed 's/^["'\'']//' \
 | sort -u
+```
 
+```bash
 # Cari path yang relevan dengan chat/backend flow
 strings main.538e8d6b6e25fd45.js \
 | grep -Ei '/(chat|message|history|feedback|prompt|config|user|session|document|source|admin)'
@@ -111,18 +129,26 @@ strings main.538e8d6b6e25fd45.js \
 # Cari indikasi HTTP method mapping
 # Kadang bundle menyimpan string seperti endpoint:POST
 grep -aoE '[A-Za-z0-9_-]+:(GET|POST|PUT|DELETE)' main.538e8d6b6e25fd45.js
+```
 
+```bash
 # Cari penggunaan Angular HTTP / fetch
 # Untuk identifikasi actual API call
 grep -aiE 'http\.post|http\.get|fetch\(' main.538e8d6b6e25fd45.js
+```
 
+```bash
 # Angular biasanya ada pattern ini:
 this.http.post(this.api + "/chats")
+```
 
+```bash
 # Cari lokasi string /chats
 # Supaya bisa inspect logic sekitar endpoint
 grep -n "/chats" main.538e8d6b6e25fd45.js | head -20
+```
 
+```bash
 # Inspect context sekitar /chats
 # Biasanya keliatan request body/auth flow
 grep -n -C 5 "/chats" main.538e8d6b6e25fd45.js
