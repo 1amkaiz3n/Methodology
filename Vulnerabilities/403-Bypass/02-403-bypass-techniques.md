@@ -1,6 +1,6 @@
 # 403 BYPASS ATTACK PHASE
 
----
+
 
 ## 1. METHOD BYPASS TESTING
 
@@ -15,7 +15,7 @@
 
 Itu valid finding candidate.
 
----
+
 
 ### Command
 
@@ -39,7 +39,11 @@ for m in GET POST PUT PATCH OPTIONS HEAD TRACE; do
 done | tee ../403-Bypass/method_bypass.txt
 ```
 
----
+## Tools 403 Bypass
+
+```bash
+./bypass-403.sh https://example.com/admin
+```
 
 ## 2. HEADER BYPASS TESTING
 
@@ -51,7 +55,7 @@ Cari:
 * internal IP bypass
 * host confusion
 
----
+
 
 ### Header candidates
 
@@ -63,7 +67,7 @@ X-Client-IP: 127.0.0.1
 X-Forwarded-Host: localhost
 ```
 
----
+
 
 ### Tools
 
@@ -74,7 +78,7 @@ Pake:
 * nuclei custom templates
 * burp intruder
 
----
+
 
 ### Contoh
 
@@ -82,7 +86,7 @@ Pake:
 ffuf -w ../403-Bypass/targets.txt:HOST -u https://HOST/ -H "X-Forwarded-For: 127.0.0.1"
 ```
 
----
+
 
 ## 3. PATH NORMALIZATION BYPASS
 
@@ -91,7 +95,7 @@ Cari:
 * proxy/backend mismatch
 * path confusion
 
----
+
 
 ### Payload examples
 
@@ -105,7 +109,7 @@ Cari:
 %2e%2e/
 ```
 
----
+
 
 ## 4. CDN / ORIGIN DISCOVERY
 
@@ -123,7 +127,7 @@ Tujuannya:
 * cari IP origin asli
 * bypass CDN/WAF
 
----
+
 
 ### Cari:
 
@@ -133,7 +137,7 @@ Tujuannya:
 * old DNS
 * exposed origin
 
----
+
 
 ### Tools
 
@@ -145,7 +149,7 @@ Tujuannya:
 * uncover
 * nuclei ssl
 
----
+
 
 ## 5. HOST HEADER FUZZING
 
@@ -154,7 +158,7 @@ Cari:
 * virtual host confusion
 * hidden backend
 
----
+
 
 ### Contoh
 
@@ -164,7 +168,7 @@ ffuf -w wordlist.txt \
 -H "Host: FUZZ"
 ```
 
----
+
 
 ## 6. CACHE BEHAVIOR TESTING
 
@@ -176,7 +180,7 @@ Cari:
 * cache deception
 * stale cache leak
 
----
+
 
 ### Cek:
 
@@ -187,7 +191,7 @@ age
 via
 ```
 
----
+
 
 ## 7. RESPONSE DIFFERENTIAL ANALYSIS
 
@@ -218,7 +222,7 @@ Kadang:
 
 itu tanda backend leak.
 
----
+
 
 ## 8. PARAMETER DISCOVERY
 
@@ -237,7 +241,7 @@ Tapi:
 
 ternyata open.
 
----
+
 
 ### Pakai:
 
@@ -249,7 +253,7 @@ katana
 hakrawler
 ```
 
----
+
 
 ## 9. JAVASCRIPT RECON
 
@@ -262,7 +266,7 @@ Cari:
 * admin panel
 * internal URL
 
----
+
 
 ### Tools
 
@@ -272,13 +276,13 @@ Cari:
 * waybackurls
 * secretfinder
 
----
+
 
 ## 10. AUTOMATED NUCLEI PASSIVE
 
 Baru setelah recon matang.
 
----
+
 
 ### Jalankan:
 

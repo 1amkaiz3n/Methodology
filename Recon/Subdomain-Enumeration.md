@@ -18,14 +18,20 @@ wget https://raw.githubusercontent.com/trickest/resolvers/refs/heads/main/resolv
 
 ```bash
 subfinder -dL wildcards | anew domains
-cat wildcards | assetfinder --subs-only | sort -u | anew domains
+assetfinder --subs-only $(cat wildcards) | sort -u | anew domains
 chaos -dL wildcards | anew domains
 ```
 
 ```bash
-bbot -t wildcards -p subdomain-enum -o .
+bbot -t wildcards -p subdomain-enum -o bbot-output
 ```
-> **BBBOT ini akan menghaislkn folder rnadom seperti `sophisticated_diana`,dan di dalalmnay ad beberpa file seprti `subdomains.txt `**
+> **BBBOT ini akan menghaislkn folder `bbot-output`,dan di dalalmnay ada beberpa file seprti `subdomains.txt`**
+
+Pindahin hasil bbot ke file domains
+
+```bash
+find bbot-output -type f -name "subdomains.txt" -exec cat {} \; | anew domains
+```
 
 ```bash
 cat wildcards | while read domain; do
@@ -77,7 +83,7 @@ sort -u domains -o domains
 ## HTTP PROBING
 
 ```bash
-cat domains | httpx -silent -threads 200 | anew hosts
+httpx -l domains -silent -threads 200 | anew hosts
 ```
 
 ## Metadata Fingerprinting
@@ -110,7 +116,9 @@ cat domains | httpx -silent -threads 200 \
 
 ```bash id="s1"
 subfinder -dL wildcards | anew domains && \
-cat wildcards | assetfinder --subs-only | sort -u | anew domains && \
+assetfinder --subs-only $(cat wildcards) | anew domains && \
+bbot -t wildcards -p subdomain-enum -o bbot-output && \
+find bbot-output -type f -name "subdomains.txt" -exec cat {} \; | anew domains && \
 cat wildcards | while read domain; do
   curl -s "https://crt.sh/?q=%.$domain&output=json" \
     | grep -v '^<' \
@@ -119,14 +127,14 @@ cat wildcards | while read domain; do
     | tr ',' '\n' \
     | grep -v '^\*' \
     | grep "\.$domain$"
-done | sort -u | anew domains && \
+done | anew domains && \
 chaos -dL wildcards | anew domains && \
 cat wildcards | while read domain; do
   github-subdomains -d "$domain" -raw
 done | grep -v 'https://' | grep -v '^\[' | anew domains && \
-cat domains | dnsx -resp -a -cname -silent | anew valid_domains.txt && \
-cat valid_domains.txt | awk '{print $1}' | anew domains && \
-cat domains | httpx -silent -threads 200 -follow-redirects -status-code -title -tech-detect -content-length -web-server -ip -cname -location | tee live_hosts_info
+dnsx -l domains -resp -a -cname -silent | anew valid_domains.txt && \
+awk '{print $1}' valid_domains.txt | anew domains && \
+httpx -l domains -silent -threads 200 -follow-redirects -status-code -title -tech-detect -content-length -web-server -ip -cname -location | tee live_hosts_info
 ```
 
 OUtput :

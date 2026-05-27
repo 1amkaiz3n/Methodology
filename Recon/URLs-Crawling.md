@@ -14,7 +14,7 @@ katana -list hosts -d 5 -silent -ef css,js,png,jpg,jpeg,svg | anew urls
 
 ```bash
 # 📌 JAVASCRIPT-BASED ENDPOINTS
-cat hosts | hakrawler -depth 3 -plain | sort -u | anew urls
+cat hosts | hakrawler -d 3 | sort -u | anew urls
 ```
 
 ```bash
