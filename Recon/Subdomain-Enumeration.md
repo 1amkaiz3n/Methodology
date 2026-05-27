@@ -117,10 +117,8 @@ cat domains | httpx -silent -threads 200 \
 ```bash id="s1"
 subfinder -silent -dL wildcards | anew domains && \
 assetfinder --subs-only $(cat wildcards) | anew domains && \
-bbot -t wildcards -p subdomain-enum -o bbot-output && \
-find bbot-output -type f -name "subdomains.txt" -exec cat {} \; | anew domains && \
 cat wildcards | while read domain; do
-  curl -s "https://crt.sh/?q=%.$domain&output=json" \
+curl -s "https://crt.sh/?q=%.$domain&output=json" \
     | grep -v '^<' \
     | jq -r '.[].name_value' 2>/dev/null \
     | sed 's/\*\.//g' \
@@ -130,7 +128,7 @@ cat wildcards | while read domain; do
 done | anew domains && \
 chaos -dL wildcards | anew domains && \
 cat wildcards | while read domain; do
-  github-subdomains -d "$domain" -raw
+github-subdomains -d "$domain" -raw
 done | grep -v 'https://' | grep -v '^\[' | anew domains && \
 dnsx -l domains -resp -a -cname -silent | anew valid_domains.txt && \
 awk '{print $1}' valid_domains.txt | anew domains && \

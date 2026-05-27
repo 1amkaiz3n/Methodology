@@ -4,7 +4,12 @@
 
 
 ```bash
-subfinder -silent -dL wildcards | anew domains.txt && cat wildcards | while read domain; do assetfinder --subs-only "$domain"; done | anew domains.txt && chaos -dL wildcards -silent | anew domains.txt && bbot -t wildcards -p subdomain-enum -s -o bbot-output && find bbot-output -type f -name "subdomains.txt" -exec cat {} \; | anew domains.txt && cat wildcards | while read domain; do github-subdomains -d "$domain" -raw; done | grep -v 'https://' | grep -v '^\[' | anew domains.txt && cat wildcards | while read domain; do curl -s "https://crt.sh/?q=%.$domain&output=json" | grep -v '^<' | jq -r '.[].name_value' 2>/dev/null | sed 's/\*\.//g' | tr ',' '\n' | grep -v '^\*' | grep "\.$domain$"; done | sort -u | anew domains.txt && sort -u domains.txt -o domains.txt
+subfinder -silent -dL wildcards | anew domains.txt && cat wildcards | while read domain; do assetfinder --subs-only "$domain"; done | anew domains.txt && chaos -dL wildcards -silent | anew domains.txt && cat wildcards | while read domain; do github-subdomains -d "$domain" -raw; done | grep -v 'https://' | grep -v '^\[' | anew domains.txt && cat wildcards | while read domain; do curl -s "https://crt.sh/?q=%.$domain&output=json" | grep -v '^<' | jq -r '.[].name_value' 2>/dev/null | sed 's/\*\.//g' | tr ',' '\n' | grep -v '^\*' | grep "\.$domain$"; done | sort -u | anew domains.txt && sort -u domains.txt -o domains.txt
+```
+
+```bash
+bbot -t wildcards -p subdomain-enum -s -o bbot-output 
+find bbot-output -type f -name "subdomains.txt" -exec cat {} \; | anew domains.txt
 ```
 
 ## DNS Resolution + IP Maping
@@ -39,7 +44,7 @@ awk '{print $1}' live_hosts_info.txt | anew hosts.txt
 
 **PORT DISCOVERY**
 ```bash
-naabu -list ips.txt -c 50 -o ports.txt
+naabu -silent -list ips.txt -c 50 -o ports.txt
 ```
 
 **DIRECT PER-IP NMAP**
@@ -54,8 +59,8 @@ done
 ```
 
 
-## one-Liner Subdomain Enumerartion,fingerprinting
+## one-Liner Subdomain Enumeration,fingerprinting
 
 ```bash
-subfinder -silent -dL wildcards | anew domains.txt && cat wildcards | while read domain; do assetfinder --subs-only "$domain"; done | anew domains.txt && chaos -dL wildcards | anew domains.txt && bbot -t wildcards -p subdomain-enum -s -o bbot-output && find bbot-output -type f -name "subdomains.txt" -exec cat {} \; | anew domains.txt && cat wildcards | while read domain; do github-subdomains -d "$domain" -raw; done | grep -v 'https://' | grep -v '^\[' | anew domains.txt && cat wildcards | while read domain; do curl -s "https://crt.sh/?q=%.$domain&output=json" | grep -v '^<' | jq -r '.[].name_value' 2>/dev/null | sed 's/\*\.//g' | tr ',' '\n' | grep -v '^\*' | grep "\.$domain$"; done | sort -u | anew domains.txt && sort -u domains.txt -o domains.txt && dnsx -l domains.txt -a -resp-only -silent -o ips.txt && sort -u ips.txt -o ips.txt && dnsx -l domains.txt -silent -o live_domains.txt && cat live_domains.txt | httpx -silent -threads 200 -follow-redirects -status-code -title -tech-detect -content-length -web-server -ip -cname -location | tee live_hosts_info.txt | grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}' | anew ips.txt && awk '{print $1}' live_hosts_info.txt | anew hosts.txt && naabu -list ips.txt -c 50 -o ports.txt
+subfinder -silent -dL wildcards | anew domains.txt && cat wildcards | while read domain; do assetfinder --subs-only "$domain"; done | anew domains.txt && chaos -dL wildcards | anew domains.txt && cat wildcards | while read domain; do github-subdomains -d "$domain" -raw; done | grep -v 'https://' | grep -v '^\[' | anew domains.txt && cat wildcards | while read domain; do curl -s "https://crt.sh/?q=%.$domain&output=json" | grep -v '^<' | jq -r '.[].name_value' 2>/dev/null | sed 's/\*\.//g' | tr ',' '\n' | grep -v '^\*' | grep "\.$domain$"; done | sort -u | anew domains.txt && sort -u domains.txt -o domains.txt && dnsx -l domains.txt -a -resp-only -silent -o ips.txt && sort -u ips.txt -o ips.txt && dnsx -l domains.txt -silent -o live_domains.txt && cat live_domains.txt | httpx -silent -threads 200 -follow-redirects -status-code -title -tech-detect -content-length -web-server -ip -cname -location | tee live_hosts_info.txt | grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}' | anew ips.txt && awk '{print $1}' live_hosts_info.txt | anew hosts.txt && naabu -silent -list ips.txt -c 50 -o ports.txt
 ```
