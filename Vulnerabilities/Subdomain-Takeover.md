@@ -258,6 +258,18 @@ cat potential.txt | httpx -silent \
 
 ## 12. Automated Tools
 
+### subjack
+
+```bash
+cat hosts | subjack -t 20 -o results.txt
+```
+
+atau 
+
+```bash
+cat domains | subjack -t 20 -o results.txt
+```
+
 ### Subzy
 
 ```bash
