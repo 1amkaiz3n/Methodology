@@ -222,11 +222,15 @@ done
 cat potential.txt | httpx -silent -mc 404,200,400 \
   -ms "There isn't a GitHub Pages site here" \
   -o confirmed-github.txt
+```
 
+```bash
 cat potential.txt | httpx -silent \
   -ms "NoSuchBucket" \
   -o confirmed-s3.txt
+```
 
+```bash
 cat potential.txt | httpx -silent \
   -ms "No such app" \
   -o confirmed-heroku.txt

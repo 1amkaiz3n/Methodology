@@ -49,13 +49,17 @@ corscanner -u https://example.com -d "Cookie: test"
 
 # enable proxy
 corscanner -u https://example.com -p http://127.0.0.1:8080
+```
 
+```bash
 # Dari file urls
 cat urls | grep -v '^$' | while read url; do
   echo "[*] scanning $url"
   corscanner -u "$url"
 done
+```
 
+```bash
 # Dari file hosts
 cat hosts | grep -v '^$' | while read url; do
   echo "[*] scanning $url"

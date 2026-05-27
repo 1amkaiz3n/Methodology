@@ -2,33 +2,36 @@
 
 Memperdalam penemuan CORS melalui analisis JavaScript bundle.
 
----
+
 
 ## 🔍 JS Bundle Discovery
 
 ```bash
 # Menemukan file JavaScript yang di-load oleh halaman target
 # Tujuannya: cari bundle utama frontend untuk dianalisis
-curl -s https://onevasco-chat.vfsai.com | grep -Eo 'src="[^"]+js'
+curl -s https://target.com | grep -Eo 'src="[^"]+js'
 
 # Output :
 ## src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js
 ## src="runtime.f7bca012609f6470.js
 ## src="polyfills.cf77fb543ab48fd3.js
 ## src="main.538e8d6b6e25fd45.js
+```
 
+```bash
 # Buat folder untuk menyimpan hasil recon bundle JS
-mkdir -p onevasco && cd onevasco
+mkdir -p target && cd target
 
+```bash
 # Download bundle utama frontend
 # Biasanya endpoint, config, auth flow ada di sini
-curl -O https://onevasco-chat.vfsai.com/main.538e8d6b6e25fd45.js
+curl -O https://target.com/main.538e8d6b6e25fd45.js
 
 # Beautify file JS supaya readable (karena bundle biasanya minified)
 tmp=$(mktemp) && js-beautify main.538e8d6b6e25fd45.js > "$tmp" && mv "$tmp" main.538e8d6b6e25fd45.js
 ```
 
----
+
 
 ## 🔎 Recon Bundle - Basic
 
@@ -49,7 +52,7 @@ grep -R "chat" .
 grep -R "history" .
 ```
 
----
+
 
 ## 📤 Extract URLs & Endpoints
 
@@ -82,7 +85,7 @@ cat main.538e8d6b6e25fd45.js \
 grep -aiE 'api|baseUrl|clientId|realm|issuer|openid' main.538e8d6b6e25fd45.js
 ```
 
----
+
 
 ## 🗺️ Extract actual paths (bukan full URL)
 
@@ -100,7 +103,7 @@ strings main.538e8d6b6e25fd45.js \
 | grep -Ei '/(chat|message|history|feedback|prompt|config|user|session|document|source|admin)'
 ```
 
----
+
 
 ## 🔧 Cari keyword method calls
 

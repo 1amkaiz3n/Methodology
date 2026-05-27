@@ -30,7 +30,7 @@ do
   echo "=== $ep"
 
   # Kirim HEAD request untuk lihat status code/header/CORS
-  curl -sk https://onevasco-client-api.vfsai.com$ep \
+  curl -sk https://target.com$ep \
    -H "Authorization: Bearer $TOKEN" \
    -H "Origin: https://testing.aigoretech.com" \
    -H "X-App-Id: 686e00665ecc2dcf59baf3b98b1394fe" \
@@ -49,7 +49,7 @@ TOKEN='eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJ0dEdxbkRQTjZZejhtNmZ0b
 
 # Request config endpoint dengan auth + custom origin
 # Untuk validasi CORS reflection + info disclosure
-curl -isk https://onevasco-client-api.vfsai.com/applications/configs \
+curl -isk https://target.com/applications/configs \
  -H "Authorization: Bearer $TOKEN" \
  -H "Origin: https://testing.aigoretech.com" \
  -H "X-App-Id: 686e00665ecc2dcf59baf3b98b1394fe"
