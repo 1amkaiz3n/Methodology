@@ -17,9 +17,9 @@ wget https://raw.githubusercontent.com/trickest/resolvers/refs/heads/main/resolv
 ### Subfinder,asetfinder,chaos,github-domain,crt.sh,bbot
 
 ```bash
-subfinder -dL wildcards | anew domains
-assetfinder --subs-only $(cat wildcards) | sort -u | anew domains
-chaos -dL wildcards | anew domains
+subfinder -silent -dL wildcards | anew domains
+while read domain; do assetfinder --subs-only "$domain"; done | anew domains
+chaos -silent -dL wildcards | anew domains
 ```
 
 ```bash
@@ -61,7 +61,7 @@ cat domains | alterx > alterx_domain.txt
 ## DNS VALIDATION (PASSIVE + PERMUTATION OUTPUT)
 
 ```bash
-dnsx -l shuffledns.txt -resp -a -cname -silent | anew valid_domains.txt
+dnsx -l domains -resp -a -cname -silent | anew valid_domains.txt
 # atau pake file
 dnsx -l alterx_domain.txt -r /resolvers.txt -resp -o valid_domains.txt -t 300
 # shuffledns
@@ -115,7 +115,7 @@ cat domains | httpx -silent -threads 200 \
   - dnsx
 
 ```bash id="s1"
-subfinder -dL wildcards | anew domains && \
+subfinder -silent -dL wildcards | anew domains && \
 assetfinder --subs-only $(cat wildcards) | anew domains && \
 bbot -t wildcards -p subdomain-enum -o bbot-output && \
 find bbot-output -type f -name "subdomains.txt" -exec cat {} \; | anew domains && \
@@ -144,75 +144,3 @@ OUtput :
   - `valid_domains.txt` -> hasil **dnsx validation (A / CNAME resolved host)**
   - `hosts` -> **live HTTP endpoints (minimal info / status check)**
   - `live_hosts_info` -> **live HTTP hosts + full metadata fingerprinting**
-
-
-## BRUTE FORCE
-
-```bash
-wget https://wordlists-cdn.assetnote.io/data/manual/best-dns-wordlist.txt
-wget https://github.com/trickest/resolvers/blob/main/resolvers.txt
-```
-
-### shuffledns
-
-```bash
-shuffledns -mode bruteforce -d target.com -w /best-dns-wordlist.txt -r /resolvers.txt -o brute_subdomain.txt
-```
-
-
-## ACTIVE ATTACK SURFACE DISCOVERY
-
-
-
-### DNS BRUTE FORCE (Active Subdomain Enumeration)
-
-```bash
-gobuster dns -d target.com -w wordlist.txt
-mksub -d target.com -l2 -w dns-wordlist.txt
-```
-
-👉 Tujuan:
-
-* mencari subdomain dari wordlist
-* query langsung ke DNS authoritative
-
-
-
-### VIRTUAL HOST FUZZING (HTTP Layer Discovery)
-
-```bash
-ffuf -c -r \
--u 'https://www.target.com/' \
--H 'Host: FUZZ.target.com' \
--w dns-wordlist.txt
-```
-
-👉 Tujuan:
-
-* menemukan hidden apps di IP yang sama
-* bypass DNS record (tanpa subdomain exist pun bisa valid)
-
-
-
-## REVERSE DNS / IP INTELLIGENCE (INFRASTRUCTURE MAPPING)
-
-```bash
-# Ambil IP dari host aktif
-cat domains | httpx -ip -silent -o hosts_with_ip.txt
-
-# Filter ambil hanya IP
-cat hosts_with_ip.txt | awk -F'[][]' '{print $2}' | sort -u > ips.txt
-```
-
-```bash
-# PTR lookup (reverse DNS)
-cat ips.txt | dnsx -ptr -resp-only > dns_lookups.txt
-```
-
-👉 Tujuan:
-
-* mapping IP → hostname
-* menemukan asset tersembunyi dalam satu infra
-* deteksi shared hosting / cluster
-
-
