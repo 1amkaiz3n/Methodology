@@ -64,8 +64,6 @@ cat domains \
 uvx run dnsrecon -d domain.com
 ```
 
-
-
 ## 5. CNAME Enumeration & Manual Check
 
 ### Tes CNAME (manual check per host)
@@ -92,9 +90,11 @@ done
 
 ```bash
 cat domains | dnsx -silent -resp-only -cname | tee cname.txt
+```
 
-# atau
+atau
 
+```bash
 cat domains | while read d; do
     dig +short CNAME $d
 done
@@ -104,10 +104,6 @@ done
 
 ## 7. Provider Fingerprinting (SaaS Detection)
 
-```bash
-cat domains | grep -Ei \
-"herokuapp|github\.io|pages\.dev|cloudfront|fastly|zendesk|freshdesk|desk\.com|readme\.io|statuspage|unbounce|wpengine|pantheonsite|helpscout|surge\.sh|netlify|vercel|firebaseapp|webflow|ghost|uservoice|cargocollective|teamwork|atlassian|azure"
-```
 
 ```bash
 # list vuln dari i can takeover
@@ -116,9 +112,6 @@ cat domains | grep -Ei \
 ```
 
 ```bash
-cat cname.txt | grep -Ei \
-"azure|heroku|github|pages|zendesk|fastly|cloudfront|netlify|vercel|statuspage|readme|freshdesk|atlassian"
-
 cat cname.txt | grep -Ei \
 "elasticbeanstalk.com|s3.amazonaws.com|airee.ru|animaapp.io|bitbucket.io|trydiscourse.com|hatenablog.com|helpjuice.com|helpscoutdocs.com|helprace.com|cloudapp.net|cloudapp.net, cloudapp.azure.com|azurewebsites.net|blob.core.windows.net|cloudapp.azure.com|azure-api.net|azurehdinsight.net|azureedge.net|azurecontainer.io|database.windows.net|azuredatalakestore.net|search.windows.net|azurecr.io|redis.cache.windows.net|azurehdinsight.net|servicebus.windows.net|visualstudio.com|52.16.160.97|s.strikinglydns.com|na-west1.surge.sh|surveysparrow.com|read.uberflip.com|wordpress.com|worksites.net|69.164.223.206|github\.io"
 ```
