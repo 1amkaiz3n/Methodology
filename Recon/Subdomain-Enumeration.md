@@ -1,4 +1,4 @@
-# 📌 Methodology — Subdomain Enumeration
+# 📌 Subdomain Enumeration
 
 * wildcards → list domain yagn ada di scope
 Contoh :
@@ -7,19 +7,14 @@ Contoh :
 
 
 ## SUBDOMAIN DISCOVERY (PASSIVE + ACTIVE)
-
-Download Resolver :
-
-```bash
-wget https://raw.githubusercontent.com/trickest/resolvers/refs/heads/main/resolvers.txt
-```
+`
 
 ### Subfinder,asetfinder,chaos,github-domain,crt.sh,bbot
 
 ```bash
-subfinder -silent -dL wildcards | anew domains
-while read domain; do assetfinder --subs-only "$domain"; done | anew domains
-chaos -silent -dL wildcards | anew domains
+subfinder -silent -dL wildcards | anew domains.txt
+cat wildcards | assetfinder --subs-only | anew domains.txt
+chaos -silent -dL wildcards | anew domains.txt
 ```
 
 ```bash
@@ -27,16 +22,16 @@ bbot -t wildcards -p subdomain-enum -o bbot-output
 ```
 > **BBBOT ini akan menghaislkn folder `bbot-output`,dan di dalalmnay ada beberpa file seprti `subdomains.txt`**
 
-Pindahin hasil bbot ke file domains
+Pindahin hasil bbot ke file domains.txt
 
 ```bash
-find bbot-output -type f -name "subdomains.txt" -exec cat {} \; | anew domains
+find bbot-output -type f -name "subdomains.txt" -exec cat {} \; | anew domains.txt
 ```
 
 ```bash
 cat wildcards | while read domain; do
   github-subdomains -d "$domain" -raw
-done | grep -v 'https://' | grep -v '^\[' | anew domains
+done | grep -v 'https://' | grep -v '^\[' | anew domains.txt
 ```
 
 ```bash
@@ -48,97 +43,63 @@ cat wildcards | while read domain; do
     | tr ',' '\n' \
     | grep -v '^\*' \
     | grep "\.$domain$"
-done | sort -u | anew domains
+done | sort -u | anew domains.txt
 ```
-
-## PERMUTATION (EXPANSION)
+Dedup
 
 ```bash
-# Permutation
-cat domains | alterx > alterx_domain.txt
+sort -u domains.txt -o domains.txt
 ```
 
-## DNS VALIDATION (PASSIVE + PERMUTATION OUTPUT)
+## DNS Validations
 
 ```bash
-dnsx -l domains -resp -a -cname -silent | anew valid_domains.txt
-# atau pake file
-dnsx -l alterx_domain.txt -r /resolvers.txt -resp -o valid_domains.txt -t 300
-# shuffledns
-shuffledns -mode resolve -l alterx_domains.txt -r /resolvers.txt -o resolved.txt -t 50
+dnsx -l domains.txt -silent -a -cname -resp -o resolved.txt
 ```
 
-**MERGE dan DEDUP hasil validasi ke list subdomain**
+## HTTP Probing & Infrastructure Fingerprinting
+
 
 ```bash
-# MErge
-cat valid_domains.txt | awk '{print $1}' | anew domains
-```
-
-```bash
-# Dedup
-sort -u domains -o domains
-```
-
-## HTTP PROBING
-
-```bash
-httpx -l domains -silent -threads 200 | anew hosts
-```
-
-## Metadata Fingerprinting
-
-```bash
-# HTTP probing detail (fingerprinting + metadata)
-cat domains | httpx -silent -threads 200 \
--follow-redirects \
--status-code \
--title \
--tech-detect \
--content-length \
--web-server \
--ip \
--cname \
--location \
-| tee live_hosts_info
+cat resolved.txt | awk '{print $1}' | sort -u | httpx -silent -threads 200 \
+  -follow-redirects \
+  -status-code \
+  -title \
+  -tech-detect \
+  -content-length \
+  -web-server \
+  -ip \
+  -cname \
+  -location \
+  | tee live_hosts_info.txt 
 ```
 
 
 ## Versi satu baris
 
-**Perintah ini menjalankan :**
-  - subfinder
-  - assetfinder
-  - httpx
-  - alterx
-  - shuffledns
-  - dnsx
 
 ```bash id="s1"
-subfinder -silent -dL wildcards | anew domains && \
-assetfinder --subs-only $(cat wildcards) | anew domains && \
-cat wildcards | while read domain; do
-curl -s "https://crt.sh/?q=%.$domain&output=json" \
-    | grep -v '^<' \
-    | jq -r '.[].name_value' 2>/dev/null \
-    | sed 's/\*\.//g' \
-    | tr ',' '\n' \
-    | grep -v '^\*' \
-    | grep "\.$domain$"
-done | anew domains && \
-chaos -dL wildcards | anew domains && \
-cat wildcards | while read domain; do
-github-subdomains -d "$domain" -raw
-done | grep -v 'https://' | grep -v '^\[' | anew domains && \
-dnsx -l domains -resp -a -cname -silent | anew valid_domains.txt && \
-awk '{print $1}' valid_domains.txt | anew domains && \
-httpx -l domains -silent -threads 200 -follow-redirects -status-code -title -tech-detect -content-length -web-server -ip -cname -location | tee live_hosts_info
+subfinder -silent -dL wildcards | anew domains.txt && \
+cat wildcards | while read domain; do assetfinder --subs-only "$domain"; done | anew domains.txt && \
+chaos -dL wildcards | anew domains.txt && \
+cat wildcards | while read domain; do github-subdomains -d "$domain" -raw; done | grep -v 'https://' | grep -v '^\[' | anew domains.txt && \
+cat wildcards | while read domain; do curl -s "https://crt.sh/?q=%.$domain&output=json" | grep -v '^<' | jq -r '.[].name_value' 2>/dev/null | sed 's/\*\.//g' | tr ',' '\n' | grep -v '^\*' | grep "\.$domain$"; done | sort -u | anew domains.txt && \
+sort -u domains.txt -o domains.txt && \
+dnsx -l domains.txt -silent -a -cname -resp | awk '{print $1}' | sort -u | httpx -silent -threads 200 \
+  -follow-redirects \
+  -status-code \
+  -title \
+  -tech-detect \
+  -content-length \
+  -web-server \
+  -ip \
+  -cname \
+  -location \
+  | tee live_hosts_info.txt
 ```
 
 OUtput :
-  - `domains` -> List subdomain
-  - `alterx_domains.txt` -> **hasil permutasi / expansion subdomain**
-  - `resolved.txt` -> hasil **shuffledns resolve (domain yang benar-benar resolve DNS)**
-  - `valid_domains.txt` -> hasil **dnsx validation (A / CNAME resolved host)**
-  - `hosts` -> **live HTTP endpoints (minimal info / status check)**
+  - `domains.txt` -> List subdomain
+  - `domains` -> hasil **dnsx validation (A / CNAME resolved host)**
+  - `hosts.txt` -> **live HTTP endpoints (minimal info / status check)**
   - `live_hosts_info` -> **live HTTP hosts + full metadata fingerprinting**
