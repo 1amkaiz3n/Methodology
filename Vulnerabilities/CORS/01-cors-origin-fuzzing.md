@@ -21,13 +21,22 @@ Origin: https://evil.com%2etarget.com
 ## 🚀 Menggunakan meg
 
 ```bash
-meg --verbose --header "Origin: https://evil.com" paths hosts cors_out
+# buat paths dulu
+cat urls | unfurl path | sort -u > paths 
+```
 
+```bash
+meg --verbose --header "Origin: https://evil.com" paths hosts cors_out
+```
+
+```bash
 # CARI
 grep -Rni "Access-Control-Allow-Origin: https://evil.com" cors_out/
+```
 
-## Lanjut cari asal reflected nya, misalnya ada di feedback.post.ch/1c29555df
-grep -Rni "Access-Control-Allow-Origin" cors_out/feedback.post.ch/1c29555df*
+```bash
+## Lanjut cari asal reflected nya, misalnya ada di feedback.target.com/1c29555df
+grep -Rni "Access-Control-Allow-Credentials: true" cors_out/feedback.target.com/1c29555df*
 ```
 
 ---
@@ -37,16 +46,24 @@ grep -Rni "Access-Control-Allow-Origin" cors_out/feedback.post.ch/1c29555df*
 ```bash
 # Aktifkan env
 source /myenv/bin/activate 
+```
 
+```bash
 # Basic
 corscanner -u https://example.com
+```
 
+```bash
 # Spesific urls
 corscanner -u https://example.com/restapi
+```
 
+```bash
 # Spesific header
 corscanner -u https://example.com -d "Cookie: test"
+```
 
+```bash
 # enable proxy
 corscanner -u https://example.com -p http://127.0.0.1:8080
 ```

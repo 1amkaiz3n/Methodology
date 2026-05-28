@@ -101,6 +101,9 @@ curl -i -H "X-Forwarded-Host: evil.com%0d%0aSet-Cookie:crlf=1" https://row2.vfsg
 ```bash
 meg -v -c 80 "///example.com/%2f.." hosts open_redirect_out
 ## output ke open_redirect_out
+```
+
+```bash
 # Cari
 grep -hri 'Location: //example.com' open_redirect_out/
 ```
@@ -109,10 +112,14 @@ grep -hri 'Location: //example.com' open_redirect_out/
 
 ```bash
 meg --verbose --header "Origin: https://evil.com" paths hosts cors_out
+```
 
+```bash
 # CARI
 grep -Rni "Access-Control-Allow-Origin: https://evil.com" cors_out/
+```
 
-## Lanjut  cari asal reflected nya,misakan ad di feedback.post.ch/1c29555df
-grep -Rni "Access-Control-Allow-Origin" cors_out/feedback.post.ch/1c29555df*
+```bash
+## Lanjut  cari asal reflected nya,misakan ad di feedback.target.com/1c29555df
+grep -Rni "Access-Control-Allow-Origin" cors_out/feedback.target.com/1c29555df*
 ```
