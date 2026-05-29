@@ -7,9 +7,7 @@ Contoh :
 
 
 ## SUBDOMAIN DISCOVERY (PASSIVE + ACTIVE)
-`
 
-### Subfinder,asetfinder,chaos,github-domain,crt.sh,bbot
 
 ```bash
 subfinder -silent -dL wildcards | anew domains.txt
@@ -61,7 +59,7 @@ dnsx -l domains.txt -silent -a -cname -resp -o resolved.txt
 
 
 ```bash
-cat resolved.txt | awk '{print $1}' | sort -u | httpx -silent -threads 200 \
+cat resolved.txt | httpx -silent -threads 200 \
   -follow-redirects \
   -status-code \
   -title \
@@ -71,16 +69,19 @@ cat resolved.txt | awk '{print $1}' | sort -u | httpx -silent -threads 200 \
   -ip \
   -cname \
   -location \
-  | tee live_hosts_info.txt 
+  -o live_hosts_info.txt
 ```
 
+```bash
+cat live_hosts_info.txt | awk '{print $1}' | sort -u | anew hosts.txt
+```
 
 ## Versi satu baris
 
 
 ```bash id="s1"
 subfinder -silent -dL wildcards | anew domains.txt && \
-cat wildcards | while read domain; do assetfinder --subs-only "$domain"; done | anew domains.txt && \
+cat wildcards | assetfinder --subs-only | anew domains.txt && \
 chaos -dL wildcards | anew domains.txt && \
 cat wildcards | while read domain; do github-subdomains -d "$domain" -raw; done | grep -v 'https://' | grep -v '^\[' | anew domains.txt && \
 cat wildcards | while read domain; do curl -s "https://crt.sh/?q=%.$domain&output=json" | grep -v '^<' | jq -r '.[].name_value' 2>/dev/null | sed 's/\*\.//g' | tr ',' '\n' | grep -v '^\*' | grep "\.$domain$"; done | sort -u | anew domains.txt && \

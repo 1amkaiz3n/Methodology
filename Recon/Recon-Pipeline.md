@@ -21,7 +21,6 @@ dnsx -l domains.txt -a -resp-only -silent -o ips.txt
 ## HTTP Probing & Infrastructure Fingerprinting
 
 
-
 ```bash
 cat domains.txt | httpx -silent -threads 200 \
   -follow-redirects \
@@ -33,10 +32,11 @@ cat domains.txt | httpx -silent -threads 200 \
   -ip \
   -cname \
   -location \
-  | tee live_hosts_info.txt \
-  | grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}' \
-  | anew ips.txt && \
-awk '{print $1}' live_hosts_info.txt | anew hosts.txt
+  -o live_hosts_info.txt
+```
+
+```bash
+cat live_hosts_info.txt | awk '{print $1}' | sort -u | anew hosts.txt
 ```
 
 Dedup
