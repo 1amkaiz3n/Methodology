@@ -1,11 +1,11 @@
-# Metodologi Subdomain TakeOver
+# Subdomain TakeOver
 
 ## 1. Subdomain Enumeration
 
 ```bash
-subfinder -dL wildcards | tee domains
+subfinder -dL wildcards | tee domains.txt
 
-cat wildcard | assetfinder --subs-only | anew domains
+cat wildcard | assetfinder --subs-only | anew domains.txt
 ```
 
 ### Tambahan Source Passive Recon
@@ -20,15 +20,15 @@ cat wildcards | while read domain; do
     | tr ',' '\n' \
     | grep -v '^\*' \
     | grep "\.$domain$"
-done | sort -u | anew domains
+done | sort -u | anew domains.txt
 
 # chaos (ProjectDiscovery)
-chaos -dL wildcards | anew domains
+chaos -dL wildcards | anew domains.txt
 
 # github-subdomains
 cat wildcards | while read domain; do
   github-subdomains -d "$domain" -raw
-done | grep -v 'https://' | grep -v '^\[' | anew domains
+done | grep -v 'https://' | grep -v '^\[' | anew domains.txt
 
 ```
 
@@ -39,11 +39,11 @@ done | grep -v 'https://' | grep -v '^\[' | anew domains
 ```bash
 # puredns bruteforce
 puredns bruteforce wordlists/best-dns-wordlist.txt target.com \
-  --resolvers resolvers.txt | anew domains
+  --resolvers resolvers.txt | anew domains.txt
 
 # alterx - generate variasi subdomain
-alterx -list domains -enrich | puredns resolve \
-  --resolvers resolvers.txt | anew domains
+alterx -list domains.txt -enrich | puredns resolve \
+  --resolvers resolvers.txt | anew domains.txt
 ```
 
 
@@ -51,9 +51,9 @@ alterx -list domains -enrich | puredns resolve \
 ## 3. Live Hosts Validation
 
 ```bash
-cat domains \
+cat domains.txt \
 | httpx -silent -threads 200 \
-| anew hosts
+| anew hosts.txt
 ```
 
 
@@ -69,14 +69,14 @@ uvx run dnsrecon -d domain.com
 ### Tes CNAME (manual check per host)
 
 ```bash
-cat hosts | sed 's|https\?://||' | while read d; do
+cat hosts.txt | sed 's|https\?://||' | while read d; do
   echo "==== $d ===="
   dig +short $d cname
 done
 ```
 
 ```bash
-cat hosts | sed 's|https\?://||' | while read d; do
+cat hosts.txt | sed 's|https\?://||' | while read d; do
   cname=$(dig +short "$d" cname)
   if echo "$cname" | grep -Eqi 'elasticbeanstalk\.com|s3\.amazonaws\.com|animaapp\.io|bitbucket\.io|trydiscourse\.com|helpjuice\.com|helpscoutdocs\.com|helprace\.com|cloudapp\.net|cloudapp\.azure\.com|azurewebsites\.net|blob\.core\.windows\.net|azure-api\.net|azurehdinsight\.net|azureedge\.net|azurecontainer\.io|database\.windows\.net|azuredatalakestore\.net|search\.windows\.net|azurecr\.io|redis\.cache\.windows\.net|servicebus\.windows\.net|visualstudio\.com|s\.strikinglydns\.com|surveysparrow\.com|read\.uberflip\.com|wordpress\.com|worksites\.net|github\.io'; then
     echo "[POTENTIAL] $d -> $cname"
@@ -89,13 +89,13 @@ done
 ## 6. CNAME Extraction (Automated)
 
 ```bash
-cat domains | dnsx -silent -resp-only -cname | tee cname.txt
+cat domains.txt | dnsx -silent -resp-only -cname | tee cname.txt
 ```
 
 atau
 
 ```bash
-cat domains | while read d; do
+cat domains.txt | while read d; do
     dig +short CNAME $d
 done
 ```
@@ -107,7 +107,7 @@ done
 
 ```bash
 # list vuln dari i can takeover
-cat domains | grep -Ei \
+cat domains.txt | grep -Ei \
 "elasticbeanstalk.com|s3.amazonaws.com|airee.ru|animaapp.io|bitbucket.io|trydiscourse.com|hatenablog.com|helpjuice.com|helpscoutdocs.com|helprace.com|cloudapp.net|cloudapp.net, cloudapp.azure.com|azurewebsites.net|blob.core.windows.net|cloudapp.azure.com|azure-api.net|azurehdinsight.net|azureedge.net|azurecontainer.io|database.windows.net|azuredatalakestore.net|search.windows.net|azurecr.io|redis.cache.windows.net|azurehdinsight.net|servicebus.windows.net|visualstudio.com|52.16.160.97|s.strikinglydns.com|na-west1.surge.sh|surveysparrow.com|read.uberflip.com|wordpress.com|worksites.net|69.164.223.206|github\.io"
 ```
 
@@ -122,7 +122,7 @@ cat cname.txt | grep -Ei \
 
 ```bash
 # Cek NS record yang pointing ke registrar yang bisa diklaim
-cat domains | while read d; do
+cat domains.txt | while read d; do
   ns=$(dig +short NS "$d")
   if echo "$ns" | grep -Eqi \
     "afraid\.org|registrar-servers\.com|bodis\.com|parkingcrew\.net|sedoparking\.com|above\.com"; then
@@ -188,11 +188,11 @@ check() {
 export -f check
 export GREEN YELLOW RED BLUE NC
 
-cat hosts | xargs -P 30 -I {} bash -c 'check "{}"'
+cat hosts.txt | xargs -P 30 -I {} bash -c 'check "{}"'
 ```
 
 ```bash
-cat hosts | ./takeover-check.sh
+cat hosts.txt | ./takeover-check.sh
 ```
 
 
@@ -261,36 +261,36 @@ cat potential.txt | httpx -silent \
 ### subjack
 
 ```bash
-cat hosts | subjack -t 20 -o results.txt
+cat hosts.txt | subjack -t 20 -o results.txt
 ```
 
 atau 
 
 ```bash
-cat domains | subjack -t 20 -o results.txt
+cat domains.txt | subjack -t 20 -o results.txt
 ```
 
 ### Subzy
 
 ```bash
-subzy run --targets hosts --concurrency 100 --hide_fails --verify_ssl
+subzy run --targets hosts.txt --concurrency 100 --hide_fails --verify_ssl
 ```
 
 ### Nuclei
 
 ```bash
-nuclei -t ~/nuclei-templates/dns/ -l hosts
+nuclei -t ~/nuclei-templates/dns/ -l hosts.txt
 ```
 
 ```bash
-nuclei -t ~/nuclei-templates/http/takeovers/ -l hosts
+nuclei -t ~/nuclei-templates/http/takeovers/ -l hosts.txt
 ```
 
 ```bash
 # Jalanin dengan severity filter
 nuclei -t ~/nuclei-templates/http/takeovers/ \
        -t ~/nuclei-templates/dns/ \
-       -l hosts \
+       -l hosts.txt \
        -severity medium,high,critical \
        -o nuclei-results.txt
 ```
@@ -301,11 +301,11 @@ nuclei -t ~/nuclei-templates/http/takeovers/ \
 
 ```bash
 # Simpan hasil scan sebelumnya
-cp hosts hosts.old
+cp hosts.txt hosts.txt.old
 
 # Jalanin ulang enumeration & validasi
 # Bandingkan untuk temukan target baru
-diff hosts.old hosts | grep "^>" | anew new-targets.txt
+diff hosts.txt.old hosts.txt | grep "^>" | anew new-targets.txt
 ```
 
 
