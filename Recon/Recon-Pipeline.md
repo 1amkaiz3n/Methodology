@@ -2,10 +2,46 @@
 
 ## Domains Enumeration
 
+**Subfinder**
 
 ```bash
-subfinder -silent -dL wildcards | anew domains.txt && cat wildcards | while read domain; do assetfinder --subs-only "$domain"; done | anew domains.txt && chaos -dL wildcards -silent | anew domains.txt && cat wildcards | while read domain; do github-subdomains -d "$domain" -raw; done | grep -v 'https://' | grep -v '^\[' | anew domains.txt && cat wildcards | while read domain; do curl -s "https://crt.sh/?q=%.$domain&output=json" | grep -v '^<' | jq -r '.[].name_value' 2>/dev/null | sed 's/\*\.//g' | tr ',' '\n' | grep -v '^\*' | grep "\.$domain$"; done | sort -u | anew domains.txt && sort -u domains.txt -o domains.txt
+subfinder -silent -dL wildcards | anew domains.txt  &&  && && 
 ```
+
+**assetfinder**
+
+```bash
+while read domain; do
+  assetfinder --subs-only "$domain"
+done < wildcards | anew domains.txt
+```
+
+**chaos**
+
+```bash
+chaos -dL wildcards -silent | anew domains.txt
+```
+
+**github-subdomains**
+
+```bash
+cat wildcards | while read domain; do github-subdomains -d "$domain" -raw; done | grep -v 'https://' | grep -v '^\[' | anew domains.txt
+```
+
+**crt.sh**
+
+```bash
+while read d; do
+  curl -s "https://crt.sh/?q=%25.$d&output=json" \
+  | jq -r '.[].name_value' 2>/dev/null
+done < wildcards \
+| sed 's/\*\.//g' \
+| tr ',' '\n' \
+| grep -v '^\*' \
+| sort -u | anew domains.txt
+```
+
+**bbot**
 
 ```bash
 bbot -t wildcards -p subdomain-enum -s -o bbot-output 
@@ -18,11 +54,17 @@ find bbot-output -type f -name "subdomains.txt" -exec cat {} \; | anew domains.t
 dnsx -l domains.txt -a -resp-only -silent -o ips.txt
 ```
 
+## DNS Validations
+
+```bash
+dnsx -l domains.txt -silent -a -cname -resp -o resolved.txt
+```
+
 ## HTTP Probing & Infrastructure Fingerprinting
 
 
 ```bash
-cat domains.txt | httpx -silent -threads 200 \
+httpx -l resolved.txt -silent -threads 200 \
   -follow-redirects \
   -status-code \
   -title \
@@ -100,7 +142,8 @@ cat wildcards | while read domain; do curl -s "https://crt.sh/?q=%.$domain&outpu
 sort -u domains.txt -o domains.txt && \
 dnsx -l domains.txt -a -resp-only -silent -o ips.txt && \
 sort -u ips.txt -o ips.txt && \
-cat domains.txt | httpx -silent -threads 200 -follow-redirects -status-code -title -tech-detect -content-length -web-server -ip -cname -location | tee live_hosts_info.txt | grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}' | anew ips.txt && \
+dnsx -l domains.txt -silent -a -cname -resp -o resolved.txt && \
+httpx -l resolved.txt -silent -threads 200 -follow-redirects -status-code -title -tech-detect -content-length -web-server -ip -cname -location | tee live_hosts_info.txt | grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}' | anew ips.txt && \
 awk '{print $1}' live_hosts_info.txt | anew hosts.txt && \
 naabu -silent -list ips.txt -c 50 -o ports.txt
 ```

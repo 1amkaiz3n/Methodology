@@ -2,45 +2,49 @@
 
 ## SUBDOMAIN DISCOVERY 
 
+**Subfinder**
+
 ```bash
-subfinder -silent -dL wildcards | anew domains.txt
+subfinder -silent -dL wildcards | anew domains.txt  &&  && && 
 ```
 
+**assetfinder**
+
 ```bash
-cat wildcards | assetfinder --subs-only | anew domains.txt
+while read domain; do
+  assetfinder --subs-only "$domain"
+done < wildcards | anew domains.txt
 ```
 
+**chaos**
+
 ```bash
-chaos -silent -dL wildcards | anew domains.txt
+chaos -dL wildcards -silent | anew domains.txt
 ```
 
+**github-subdomains**
+
 ```bash
-cat wildcards | while read domain; do
-  github-subdomains -d "$domain" -raw
-done | grep -v 'https://' | grep -v '^\[' | anew domains.txt
+cat wildcards | while read domain; do github-subdomains -d "$domain" -raw; done | grep -v 'https://' | grep -v '^\[' | anew domains.txt
 ```
 
+**crt.sh**
+
 ```bash
-cat wildcards | while read domain; do
-  curl -s "https://crt.sh/?q=%.$domain&output=json" \
-    | grep -v '^<' \
-    | jq -r '.[].name_value' 2>/dev/null \
-    | sed 's/\*\.//g' \
-    | tr ',' '\n' \
-    | grep -v '^\*' \
-    | grep "\.$domain$"
-done | sort -u | anew domains.txt
+while read d; do
+  curl -s "https://crt.sh/?q=%25.$d&output=json" \
+  | jq -r '.[].name_value' 2>/dev/null
+done < wildcards \
+| sed 's/\*\.//g' \
+| tr ',' '\n' \
+| grep -v '^\*' \
+| sort -u | anew domains.txt
 ```
 
+**bbot**
 
 ```bash
-bbot -t wildcards -p subdomain-enum -o bbot-output
-```
-> **BBBOT ini akan menghasilkan folder `bbot-output`,dan di dalalmnay ada beberpa file seprti `subdomains.txt`**
-
-Pindahin hasil bbot ke file domains.txt
-
-```bash
+bbot -t wildcards -p subdomain-enum -s -o bbot-output 
 find bbot-output -type f -name "subdomains.txt" -exec cat {} \; | anew domains.txt
 ```
 
@@ -51,10 +55,16 @@ find bbot-output -type f -name "subdomains.txt" -exec cat {} \; | anew domains.t
 sort -u domains.txt -o domains.txt
 ```
 
+## DNS Validations
+
+```bash
+dnsx -l domains.txt -silent -a -cname -resp -o resolved.txt
+```
+
 ## HTTP Probing & Infrastructure Fingerprinting
 
 ```bash
-cat domains.txt | httpx -silent -threads 200 \
+cat resolved.txt | httpx -silent -threads 200 \
   -follow-redirects \
   -status-code \
   -title \
@@ -208,6 +218,8 @@ cat domains.txt | grep "SUCCESS" | gf urls | httpx -sc -server -cl -path "/.git/
 ```bash
 cat hosts.txt | httpx -sc -server -cl -path "/.git/" -mc 200 -location -ms "Index of" -probe
 ```
+
+Untuk lebih lengkapny bis cek di [sini](https://1amkaiz3ns-books.gitbook.io/bug-bounty/handbook/recon/git-repository-disclosure)
 
 ## SSRF Testing
 

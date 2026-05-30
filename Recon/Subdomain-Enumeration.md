@@ -8,41 +8,52 @@ Contoh :
 
 ## SUBDOMAIN DISCOVERY (PASSIVE + ACTIVE)
 
+**Subfinder**
 
 ```bash
-subfinder -silent -dL wildcards | anew domains.txt
-cat wildcards | assetfinder --subs-only | anew domains.txt
-chaos -silent -dL wildcards | anew domains.txt
+subfinder -silent -dL wildcards | anew domains.txt  &&  && && 
 ```
 
+**assetfinder**
+
 ```bash
-bbot -t wildcards -p subdomain-enum -o bbot-output
+while read domain; do
+  assetfinder --subs-only "$domain"
+done < wildcards | anew domains.txt
 ```
-> **BBBOT ini akan menghaislkn folder `bbot-output`,dan di dalalmnay ada beberpa file seprti `subdomains.txt`**
 
-Pindahin hasil bbot ke file domains.txt
+**chaos**
 
 ```bash
+chaos -dL wildcards -silent | anew domains.txt
+```
+
+**github-subdomains**
+
+```bash
+cat wildcards | while read domain; do github-subdomains -d "$domain" -raw; done | grep -v 'https://' | grep -v '^\[' | anew domains.txt
+```
+
+**crt.sh**
+
+```bash
+while read d; do
+  curl -s "https://crt.sh/?q=%25.$d&output=json" \
+  | jq -r '.[].name_value' 2>/dev/null
+done < wildcards \
+| sed 's/\*\.//g' \
+| tr ',' '\n' \
+| grep -v '^\*' \
+| sort -u | anew domains.txt
+```
+
+**bbot**
+
+```bash
+bbot -t wildcards -p subdomain-enum -s -o bbot-output 
 find bbot-output -type f -name "subdomains.txt" -exec cat {} \; | anew domains.txt
 ```
 
-```bash
-cat wildcards | while read domain; do
-  github-subdomains -d "$domain" -raw
-done | grep -v 'https://' | grep -v '^\[' | anew domains.txt
-```
-
-```bash
-cat wildcards | while read domain; do
-  curl -s "https://crt.sh/?q=%.$domain&output=json" \
-    | grep -v '^<' \
-    | jq -r '.[].name_value' 2>/dev/null \
-    | sed 's/\*\.//g' \
-    | tr ',' '\n' \
-    | grep -v '^\*' \
-    | grep "\.$domain$"
-done | sort -u | anew domains.txt
-```
 Dedup
 
 ```bash
@@ -59,13 +70,14 @@ dnsx -l domains.txt -silent -a -cname -resp -o resolved.txt
 
 
 ```bash
-cat resolved.txt | httpx -silent -threads 200 \
+httpx -l resolved.txt -silent -threads 200 \
   -follow-redirects \
   -status-code \
   -title \
   -tech-detect \
   -content-length \
   -web-server \
+  -server \
   -ip \
   -cname \
   -location \
