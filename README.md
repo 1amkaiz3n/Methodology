@@ -61,6 +61,7 @@ cat domains.txt | httpx -silent -threads 200 \
   -tech-detect \
   -content-length \
   -web-server \
+  -server
   -ip \
   -cname \
   -location \
@@ -202,6 +203,10 @@ Untuk lebih lengkapnya bisa cek [disini](https://1amkaiz3ns-books.gitbook.io/bug
 
 ```bash
 cat domains.txt | grep "SUCCESS" | gf urls | httpx -sc -server -cl -path "/.git/" -mc 200 -location -ms "Index of" -probe
+```
+
+```bash
+cat hosts.txt | httpx -sc -server -cl -path "/.git/" -mc 200 -location -ms "Index of" -probe
 ```
 
 ## SSRF Testing
