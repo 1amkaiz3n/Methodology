@@ -91,6 +91,10 @@ katana -list hosts.txt -d 5 -jc -kf all | anew urls.txt
 ```
 
 ```bash
+katana -list hosts.txt -d 5 -js-crawl -xhr -kf all | anew urls.txt
+```
+
+```bash
 cat hosts.txt | waybackurls |  anew urls.txt
 ```
 

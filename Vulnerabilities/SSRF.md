@@ -1,4 +1,4 @@
-# 🧠 SSRF SECURITY HANDBOOK (Practical Methodology)
+# SSRF SECURITY HANDBOOK (Practical Methodology)
 
 
 
